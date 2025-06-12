@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Fortify\PasswordValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Laravel\Jetstream\Jetstream;
 
 class AdminUserController extends Controller
 {
+    use PasswordValidationRules;
     /**
      * Display a listing of the resource.
      */
@@ -32,14 +37,20 @@ class AdminUserController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validated();
+        Validator::make((array)$request, [
+            'name' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => $this->passwordRules(),
+            'phone' => ['string', 'max:12']
+        ])->validate();
 
-        $user = User::create($validated);
-
-        return response()->json([
-            'message' => 'Пользователь успешно создан',
-            'data' => $user
-        ], 201);
+        return User::create([
+            'name' => $request['name'],
+            'lastname' => $request['lastname'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+        ]);
     }
 
     /**

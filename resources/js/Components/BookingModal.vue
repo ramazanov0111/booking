@@ -4,6 +4,7 @@
         :max-width="maxWidth"
         :closeable="closeable"
         @close="closeModal"
+        @focus="getDisabledDatesForRoom"
     >
         <div class="px-6 py-4">
             <div class="text-lg font-medium text-gray-900">
@@ -14,54 +15,64 @@
                 </header>
             </div>
 
-            <div class="mt-4 text-sm text-gray-600">
-                <div class="date-pickers">
-                    <div class="date-group">
-                        <label>Дата заезда</label>
-                        <VueDatePicker
-                            v-model="checkInDate"
-                            :disabled-dates="disabledDates"
-                            :enable-time-picker="false"
-                            format="yyy-MM-dd"
-                            auto-apply
-                            @on-change="loadPrice"
-                        />
-                    </div>
-
-                    <div class="date-group">
-                        <label>Дата выезда</label>
-                        <VueDatePicker
-                            v-model="checkOutDate"
-                            :disabled-dates="disabledDates"
-                            :enable-time-picker="false"
-                            format="yyy-MM-dd"
-                            auto-apply
-                            @on-change="loadPrice"
-                        />
-                    </div>
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6 mt-4 text-sm text-gray-600">
+                <div class="date-range-picker">
+                    <label>Дата заезда</label>
+                    <VueDatePicker
+                        v-model="checkInDate"
+                        :disabled-dates="disabledDates"
+                        :enable-time-picker="false"
+                        format="yyy-MM-dd"
+                        auto-apply
+                        @on-change="loadPrice"
+                    />
                 </div>
 
-                <!-- Детализация стоимости -->
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Количество ночей</th>
-                        <th>Цена за ночь в указанный период</th>
-                        <th>Сумма</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
+                <div class="date-range-picker">
+                    <label>Дата выезда</label>
+                    <VueDatePicker
+                        v-model="checkOutDate"
+                        :disabled-dates="disabledDates"
+                        :enable-time-picker="false"
+                        format="yyy-MM-dd"
+                        auto-apply
+                        @on-change="loadPrice"
+                    />
+                </div>
 
-                        <td>{{ totalNights() }}</td>
-
-                        <td>{{ currentPrice }}</td>
-
-                        <td>{{ totalPrice }}</td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="input-group">
+                    <label>Способ оплаты <span class="required">*</span></label>
+                    <select v-model="paymentMethod" required>
+                        <option
+                            v-for="item in paymentMethods"
+                            :key="item.item"
+                            :value="item.key"
+                        >
+                            {{ item.value }}
+                        </option>
+                    </select>
+                </div>
             </div>
+            <!-- Детализация стоимости -->
+            <table>
+                <thead>
+                <tr>
+                    <th>Количество ночей</th>
+                    <th>Цена за ночь в указанный период</th>
+                    <th>Сумма</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+
+                    <td>{{ totalNights() }}</td>
+
+                    <td>{{ currentPrice }}</td>
+
+                    <td>{{ totalPrice }}</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="flex flex-row justify-end px-6 py-4 bg-gray-100 text-end">
@@ -104,29 +115,31 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    user: Object,
 })
 
 const emit = defineEmits(['close', 'booking-success'])
 
 // Состояния формы
+const isProcessing = ref(false)
 const checkInDate = ref(null)
 const checkOutDate = ref(null)
-const isProcessing = ref(false)
-const currentPrice = ref(null)
 const paymentMethod = ref(null)
+const disabledDates = ref(null)
+const currentPrice = ref(null)
+const errors = ref({})
 
-const paymentMethods = ref([
-    'online',
-    'on_site'
-])
+const paymentMethods = [
+    { key: 'online', value: 'Онлайн' },
+    { key: 'on_site', value: 'На месте' }
+];
 
-// Получение хранилища бронирований
-const bookingStore = useBookingStore()
-
-// Вычисляемые свойства
-const disabledDates = computed(() =>
-    bookingStore.getDisabledDatesForRoom(props.room?.id)
-)
+const statusList = [
+    { key: 'pending', value: 'В обработке' },
+    { key: 'confirmed', value: 'Подтверждено' },
+    { key: 'paid', value: 'Оплачено' },
+    { key: 'canceled', value: 'Отменено' }
+];
 
 const isFormValid = computed(() =>
     checkInDate.value &&
@@ -134,16 +147,15 @@ const isFormValid = computed(() =>
     checkOutDate.value > checkInDate.value
 )
 
-function totalNights () {
+function totalNights() {
     if (!checkInDate.value || !checkOutDate.value) return 0
     const diff = checkOutDate.value - checkInDate.value
 
-    console.log(checkOutDate.value, checkInDate.value);
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
 const totalPrice = computed(() =>
-    new Intl.NumberFormat('ru-RU').format(currentPrice.value * totalNights())
+    currentPrice.value * totalNights()
 )
 
 const loadPrice = async () => {
@@ -169,6 +181,18 @@ const loadPrice = async () => {
     }
 }
 
+const getDisabledDatesForRoom = async () =>  {
+    try {
+        const response1 = await axios.get(route('blocked_dates.by_room', props.room?.id))
+        const response2 = await axios.get(route('bookings.by_room', props.room?.id))
+
+        disabledDates.value = [...response1.data, ...response2.data]
+
+    } catch (error) {
+        console.error('Ошибка загрузки дат:', error)
+    }
+}
+
 // Методы
 const closeModal = () => {
     resetForm()
@@ -184,21 +208,32 @@ const resetForm = () => {
 const handleBooking = async () => {
     if (!isFormValid.value) return
 
-    isProcessing.value = true
-
     try {
-        await bookingStore.createBooking({
-            roomId: props.room.id,
-            checkIn: checkInDate.value,
-            checkOut: checkOutDate.value,
-            paymentMethod: paymentMethod.value,
-            totalPrice: totalPrice.value
-        })
+        isProcessing.value = true
+        errors.value = {}
 
-        emit('booking-success')
+        const payload = {
+            user_id: props.user.id,
+            room_id: props.room.id,
+            payment_method: paymentMethod.value,
+            total_price: totalPrice.value,
+            check_in: checkInDate.value,
+            check_out: checkOutDate.value,
+            status: 'pending',
+            stripe_payment_id: 'qwerty'
+        }
+
+        const response = await axios.post(route('booking.store'), payload)
         closeModal()
+        console.log('Успех:', response.data);
+
     } catch (error) {
-        console.error('Ошибка бронирования:', error)
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors
+        } else {
+            console.log(error);
+            alert('Ошибка сохранения')
+        }
     } finally {
         isProcessing.value = false
     }
@@ -212,10 +247,10 @@ watch([checkInDate, checkOutDate], () => {
     loadPrice()
 })
 
-
 // Инициализация
 onMounted(async () => {
     // await loadPrice()
+    await getDisabledDatesForRoom()
 })
 
 </script>
@@ -226,13 +261,6 @@ onMounted(async () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.date-pickers {
-    display: grid;
-    position: relative;
-    gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
@@ -266,5 +294,22 @@ td {
 
 tr:hover td {
     @apply bg-gray-50;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.required {
+    color: #e53935;
 }
 </style>

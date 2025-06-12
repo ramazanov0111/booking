@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('capacity')->default(1)->comment('Вместимость (гостей)');
             $table->decimal('base_price', 10)->comment('Базовая цена');
-            $table->string('profile_photo_path', 2048)->nullable();
+            $table->string('room_image', 2048)->nullable();
             $table->json('amenities')->nullable()->comment('Доп услуги: ["Wi-Fi", "Кондиционер"]');
             $table->boolean('is_available')->default(1)->comment('Доступен/Недоступен');
             $table->boolean('deleted')->default(0)->comment('Удален');

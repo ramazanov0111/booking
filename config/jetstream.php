@@ -77,5 +77,7 @@ return [
     */
 
     'profile_photo_disk' => 'public',
+    'room_photo_disk' => 'public',
+
 
 ];

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasPhoto;
 use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
-    protected $fillable = ['name', 'description', 'base_price', 'capacity', 'amenities', 'profile_photo_path', 'is_available'];
+    use HasPhoto;
+
+    protected $fillable = ['name', 'description', 'base_price', 'capacity', 'amenities', 'room_image', 'is_available'];
 
     protected $casts = [
         'amenities' => 'array',
@@ -17,5 +20,20 @@ class Room extends Model
     public function prices(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Price::class);
+    }
+
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function blocked_dates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BlockedDate::class);
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        return url('storage/' . $this->room_image);
     }
 }

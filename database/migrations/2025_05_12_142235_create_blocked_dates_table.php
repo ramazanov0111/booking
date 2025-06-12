@@ -17,11 +17,12 @@ return new class extends Migration
             $table->foreignId('room_id')
                 ->constrained()
                 ->onDelete('cascade');
-            $table->date('date')->comment('Дата на которую недоступен номер');
+            $table->date('date_start')->comment('Дата начала когда недоступен номер');
+            $table->date('date_end')->comment('Дата которой недоступен номер')->nullable();
             $table->string('reason')->comment('Причина');
             $table->timestamps();
             $table->primary('id');
-            $table->unique(['room_id', 'date'], 'room_on_date');
+            $table->unique(['room_id', 'date_start', 'date_end'], 'room_on_date');
         });
     }
 

@@ -85,7 +85,7 @@
 
                             <td>{{ booking.total_price }}</td>
 
-                            <td>{{ booking.status }}</td>
+                            <td>{{ statuses[booking.status] }}</td>
 
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
                                 <Link :href="route('booking.edit', booking.id)" class="text-blue-600 hover:text-blue-900">
@@ -149,6 +149,14 @@ const filters = ref({
     room_id: '',
     date_range: ''
 })
+
+const statuses = ref({
+    'pending': 'В обработке',
+    'confirmed': 'Подтверждено',
+    'paid': 'Оплачено',
+    'canceled': 'Отменено',
+})
+
 const currentPage = ref(1)
 const totalPages = ref(1)
 const loading = ref(false)
@@ -193,7 +201,7 @@ const loadRooms = async () => {
     }
 }
 
-// Загрузка номеров
+// Загрузка пользователей
 const loadUsers = async () => {
     try {
         const response = await axios.get(route('users.index'))

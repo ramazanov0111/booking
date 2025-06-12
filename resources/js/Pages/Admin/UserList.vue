@@ -1,9 +1,9 @@
 <template>
-    <AppLayout title="Rooms">
+    <AppLayout title="Пользователи">
 
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Номера
+                Пользователи
             </h2>
         </template>
 
@@ -11,10 +11,10 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Заголовок и кнопка добавления -->
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Управление номерами</h1>
-                    <Link :href="route('rooms.create')"
+                    <h1 class="text-2xl font-bold">Управление пользователями</h1>
+                    <Link :href="route('users.create')"
                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        + Добавить номер
+                        + Добавить пользователя
                     </Link>
                 </div>
 
@@ -23,10 +23,10 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Название</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Вместимость</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Цена</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Имя</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Фамилия</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Телефон</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
                         </tr>
                         </thead>
@@ -43,37 +43,25 @@
                         </tr>
 
                         <!-- Список номеров -->
-                        <tr v-for="room in rooms" :key="room.id">
+                        <tr v-for="user in users" :key="user.id">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900">{{ room.name }}</div>
-                                <div class="text-gray-500 text-sm mt-1">{{ room.description }}</div>
+                                <div class="font-medium text-gray-900">{{ user.name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ room.capacity }} {{ pluralize(room.capacity, ['гость', 'гостя', 'гостей']) }}
+                                <div class="font-medium text-gray-900">{{ user.lastname }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ formatPrice(room.base_price) }}
+                                {{ user.email }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                  :class="room.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-              >
-                {{ room.is_available ? 'Доступен' : 'Недоступен' }}
-              </span>
+                                {{ user.phone }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                <!--                        <router-link-->
-                                <!--                            :to="`/admin/rooms/edit/${room.id}`"-->
-                                <!--                            class="text-blue-600 hover:text-blue-900"-->
-                                <!--                        >-->
-                                <!--                            <i class="fas fa-edit"></i>-->
-                                <!--                        </router-link>-->
-                                <Link :href="route('proger.rooms.edit', room)" class="text-blue-600 hover:text-blue-900">
+                                <Link :href="route('users.edit', user)" class="text-blue-600 hover:text-blue-900">
                                     <i class="fas fa-edit"></i>
                                 </Link>
                                 <button
-                                    @click="deleteRoom(room.id)"
+                                    @click="deleteUser(user.id)"
                                     class="text-red-600 hover:text-red-900"
                                 >
                                     <i class="fas fa-trash"></i>
@@ -87,7 +75,7 @@
                     <div class="px-6 py-4 border-t border-gray-200">
                         <div class="flex justify-between items-center">
                             <div class="text-sm text-gray-700">
-                                Показано с {{ meta.from }} по {{ meta.to }} из {{ meta.total }} номеров
+                                Показано с {{ meta.from }} по {{ meta.to }} из {{ meta.total }} пользователей
                             </div>
                             <div class="flex space-x-2">
                                 <button
@@ -111,21 +99,22 @@
 
 <script setup>
 import {ref, onMounted} from 'vue';
-import {Link} from "@inertiajs/vue3";
+import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from "@/Layouts/AppLayout.vue";
-import Welcome from "@/Components/Welcome.vue";
 
-const rooms = ref([])
+const users = ref([])
 const meta = ref({})
 const loading = ref(true)
 
+
 // Получение данных
-const fetchRooms = async (page = 1) => {
-    console.log(12312431);
+const fetchUsers = async (page = 1) => {
     try {
         loading.value = true
-        const {data} = await axios.get(`api/proger/rooms?page=${page}`)
-        rooms.value = data.data
+
+        const {data} = await axios.get(route('users.index', {'page': page}))
+
+        users.value = data.data
         meta.value = data.meta
     } catch (error) {
         console.error('Ошибка загрузки номеров:', error)
@@ -135,38 +124,25 @@ const fetchRooms = async (page = 1) => {
 }
 
 // Удаление номера
-const deleteRoom = async (id) => {
+const deleteUser = async (id) => {
     if (confirm('Вы уверены, что хотите удалить номер?')) {
         try {
-            await axios.delete(`api/proger/rooms/${room}`)
-            rooms.value = rooms.value.filter(room => room.id !== id)
+            await axios.delete(route('users.destroy', id))
+
+            users.value = users.value.filter(user => user.id !== id)
         } catch (error) {
             console.error('Ошибка удаления:', error)
         }
     }
 }
 
-// Форматирование цены
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-        maximumFractionDigits: 0
-    }).format(price)
-}
-
 // Смена страницы
 const changePage = (page) => {
-    fetchRooms(page)
-}
-
-// Склонение числительных
-const pluralize = (n, forms) => {
-    return forms[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2]
+    fetchUsers(page)
 }
 
 onMounted(() => {
-    fetchRooms()
+    fetchUsers()
 })
 
 </script>

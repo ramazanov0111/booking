@@ -32,11 +32,8 @@
                         <NavLink :href="route('rooms')" :active="route().current('rooms')" class="footer-link">
                             Номера
                         </NavLink>
-                        <NavLink :href="route('about')" :active="route().current('about')" class="footer-link">
-                            О нас
-                        </NavLink>
-                        <NavLink :href="route('about')" :active="route().current('about')" class="footer-link">
-                            Контакты
+                        <NavLink v-if="$page.props.auth.user" :href="route('booking', $page.props.auth.user.id)" :active="route().current('booking')" class="footer-link">
+                            Мои бронирования
                         </NavLink>
                     </nav>
                 </div>
@@ -110,9 +107,7 @@ export default {
             navItems: [
                 { title: 'Главная', path: '/' },
                 { title: 'Номера', path: '/rooms' },
-                { title: 'О нас', path: '/about' },
-                { title: 'Контакты', path: '/contacts' },
-                { title: 'Отзывы', path: '/reviews' }
+                { title: 'Мои бронирования', path: '/booking' }
             ],
             socials: [
                 { name: 'VK', icon: 'fab fa-vk', link: '#' },

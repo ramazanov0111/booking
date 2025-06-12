@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
+use App\Http\Resources\ReviewResource;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class AdminReviewController extends Controller
 {
@@ -37,9 +39,23 @@ class AdminReviewController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreReviewRequest $request)
+    public function store(StoreReviewRequest $request): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validated();
+
+            $booking = Review::create($validated);
+
+            return response()->json([
+                'message' => 'Бронирование успешно добавлено!',
+                'data' => new ReviewResource($booking)
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Добавьте логирование ошибки
+            Log::error('Booking creation error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

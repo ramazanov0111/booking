@@ -7,3 +7,16 @@
 [x-cloak] {
     display: none;
 }
+
+.custom-datepicker-menu {
+    z-index: 99999 !important;
+    position: fixed !important;
+    transform: translate(-50%, 0) !important;
+    left: 50% !important;
+    top: auto !important;
+    bottom: auto !important;
+}
+
+.dp__overlay {
+    z-index: 99998 !important;
+}

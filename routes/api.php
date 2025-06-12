@@ -24,6 +24,8 @@ Route::prefix('proger')->group(function (){
     Route::get('actual_price', [AdminPriceController::class, 'actualPrice']);
 
     Route::patch('review/publish/{review}', [AdminReviewController::class, 'publish'])->name('review.publish');
+
+    Route::post('upload_file/{room}', [AdminRoomController::class, 'uploadFile'])->name('room.upload_file');
     Route::delete('rooms/photo/{room}', [AdminRoomController::class, 'deletePhoto'])->name('rooms_photo.destroy');
 
 })->middleware('auth:sanctum');
@@ -31,4 +33,8 @@ Route::prefix('proger')->group(function (){
 
 Route::get('/rooms', [SpaBaseController::class, 'roomList'])->name('api.rooms.list');
 Route::get('/price/dates', [SpaBaseController::class, 'priceByDates'])->name('price.by_dates');
-
+Route::get('/blocked_dates/{room}', [SpaBaseController::class, 'getBlockedDatesByRoom'])->name('blocked_dates.by_room');
+Route::get('/bookings/{room}', [SpaBaseController::class, 'getBookingDatesByRoom'])->name('bookings.by_room');
+Route::get('/bookings', [SpaBaseController::class, 'getBookingsForUser'])->name('bookings');
+Route::patch('/cancel/{booking}', [SpaBaseController::class, 'cancelBooking'])->name('booking.cancel');
+Route::get('/reviews', [SpaBaseController::class, 'getReviews'])->name('reviews');

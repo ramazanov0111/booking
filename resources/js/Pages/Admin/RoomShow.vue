@@ -21,7 +21,7 @@
                 </div>
 
                 <!-- Форма -->
-                <form @submit.prevent="handleSubmit" class="bg-white p-6 rounded-lg shadow-md">
+                <form @submit.prevent="handleSubmit" class="bg-white p-6 rounded-lg shadow-md" enctype="multipart/form-data">
                     <!-- Название -->
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2">Название номера</label>
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Основные параметры -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
                         <!-- Вместимость -->
                         <div>
                             <label class="block text-gray-700 mb-2">Вместимость</label>
@@ -93,48 +93,19 @@
                             </label>
                         </div>
 
+                        <!-- Изображение -->
                         <div>
-                            <label class="block text-gray-700 mb-2">Статус</label>
-                            <div v-if="form.photoPreview" class="col-span-6 sm:col-span-4">
-                                <!-- Profile Photo File Input -->
-                                <input
-                                    id="photo"
-                                    ref="photoInput"
-                                    type="file"
-                                    class="hidden"
-                                    @change="updatePhotoPreview"
-                                >
-
-                                <InputLabel for="photo" value="Photo"/>
-
-                                <!-- Current Profile Photo -->
-                                <div v-show="! photoPreview" class="mt-2">
-                                    <img :src="room.preview_photo" :alt="room.name"
-                                         class="rounded-full size-20 object-cover">
-                                </div>
-
-                                <!-- New Profile Photo Preview -->
-                                <div v-show="photoPreview" class="mt-2">
-                                    <span class="block rounded-full size-20 bg-cover bg-no-repeat bg-center"
-                                        :style="'background-image: url(\'' + photoPreview + '\');'"
-                                    />
-                                </div>
-
-                                <SecondaryButton class="mt-2 me-2" type="button" @click.prevent="selectNewPhoto">
-                                    Выбрать новое фото
-                                </SecondaryButton>
-
-                                <SecondaryButton
-                                    v-if="user.profile_photo_path"
-                                    type="button"
-                                    class="mt-2"
-                                    @click.prevent="deletePhoto"
-                                >
-                                    Удалить
-                                </SecondaryButton>
-
-                                <InputError :message="form.errors.photo" class="mt-2"/>
-                            </div>
+                            <label class="block text-gray-700 mb-2">Текущее изображение</label>
+                            <img :src="form.imageUrl" alt="Текущее изображение">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Новое изображение</label>
+                            <input
+                                type="file"
+                                class="w-full p-2 border rounded-lg"
+                                @change="uploadFile"
+                            >
+                            <img :src="previewImage" v-if="previewImage" alt="Новое изображение">
                         </div>
 
                     </div>
@@ -180,7 +151,7 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Заголовок -->
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Динамика цен на текущий номер</h1>
+                    <h1 class="text-2xl font-bold">Динамика цен по текущему номеру</h1>
                 </div>
                 <!-- Таблица цен -->
                 <div class="bg-white p-12 rounded-lg shadow-md">
@@ -257,7 +228,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
 import AppLayout from "@/Layouts/AppLayout.vue";
-import {Link} from "@inertiajs/vue3";
+import {Link, useForm} from "@inertiajs/vue3";
 import {route} from "ziggy-js";
 import InputLabel from "../../Components/InputLabel.vue";
 import InputError from "../../Components/InputError.vue";
@@ -276,7 +247,7 @@ const form = ref({
     base_price: 0,
     is_available: true,
     amenities: [],
-    photo: null,
+    imageUrl: ''
 })
 
 // Список доступных удобств
@@ -290,6 +261,9 @@ const amenitiesList = ref([
     'Тапочки'
 ])
 
+
+const previewImage = ref('');
+
 // Ошибки валидации
 const errors = ref({
     name: '',
@@ -300,36 +274,6 @@ const errors = ref({
 
 const room = route().params.room
 const prices = ref([])
-const photoPreview = ref(null);
-const photoInput = ref(null);
-
-const selectNewPhoto = () => {
-    photoInput.value.click();
-};
-
-const updatePhotoPreview = () => {
-    const photo = photoInput.value.files[0];
-
-    if (! photo) return;
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        photoPreview.value = e.target.result;
-    };
-
-    reader.readAsDataURL(photo);
-};
-
-const deletePhoto = () => {
-    router.delete(route('current-user-photo.destroy'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            photoPreview.value = null;
-            clearPhotoFileInput();
-        },
-    });
-};
 
 // Загрузка данных для редактирования
 const loadRoomData = async () => {
@@ -340,6 +284,9 @@ const loadRoomData = async () => {
             ...data.data,
             amenities: data.data.amenities || []
         }
+        // previewImage.value = URL.createObjectURL(data.data.imageUrl);
+
+        console.log(form.value)
 
         prices.value = data.data.prices || [];
     } catch (error) {
@@ -385,31 +332,46 @@ const deletePrice = async (price) => {
     if (!confirm('Удалить эту цену?')) return
     try {
         await axios.delete(route('prices.destroy', price.id))
-        await loadData()
+        await loadRoomData()
     } catch (error) {
         console.error('Ошибка удаления:', error)
     }
 }
 
+const uploadFile = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+
+    formData.append('room_image', file); // Ключ должен совпадать с именем в Laravel
+
+    previewImage.value = URL.createObjectURL(file);
+
+    try {
+        const response = await axios.post(route('room.upload_file', room), formData);
+        console.log('Успех:', response.data);
+        // await loadRoomData()
+    } catch (error) {
+        console.error('Ошибка:', error.response);
+    }
+}
 
 // Отправка формы
 const handleSubmit = async () => {
     if (!validateForm()) return
 
-    try {
-        loading.value = true
-        const payload = {
-            ...form.value,
-            amenities: form.value.amenities
-        }
+    loading.value = true
+    const payload = {
+        ...form.value,
+        amenities: form.value.amenities
+    }
 
+    try {
         if (isEditMode.value) {
             await axios.put(route('rooms.update', room), payload)
         } else {
-            await axios.post(route('rooms.store', payload))
+            await axios.post(route('rooms.store'), payload)
         }
         window.location.href = route('rooms.list');
-        // await router.push('/proger/rooms/')
     } catch (error) {
         console.error('Ошибка сохранения:', error)
         // Обработка ошибок сервера

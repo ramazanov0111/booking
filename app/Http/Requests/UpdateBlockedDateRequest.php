@@ -22,7 +22,10 @@ class UpdateBlockedDateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'room_id' => 'required|exists:rooms,id',
+            'date_start' => 'required|date',
+            'date_end' => 'required|date|after:date_start',
+            'reason' => 'string',
         ];
     }
 }

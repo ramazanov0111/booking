@@ -1,51 +1,82 @@
 <template>
-    <SpaLayout title="About">
+    <SpaLayout title="Номер">
         <div class="catalog-page">
-            <!-- Фильтры и сортировка -->
-            <div class="catalog-controls">
-                <div class="filters">
-                    <div class="filter-group">
-                        <label>Даты проживания</label>
-                        <flat-pickr
-                            v-model="filters.dates"
-                            :config="dateConfig"
-                            placeholder="Выберите даты"
-                        />
-                    </div>
+            <div class="max-w-7xl mx-auto p-6 mb-6 bg-white sm:px-6 lg:px-8 rounded-xl shadow-lg">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800">Найти идеальный номер</h2>
+                    <p class="text-gray-500">Отфильтруйте варианты по вашим предпочтениям</p>
+                </div>
+                <!-- Фильтры и сортировка -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div class="filter-group">
-                        <label>Гости</label>
-                        <select v-model="filters.guests">
-                            <option v-for="n in 6" :value="n">
-                                {{ n }} {{ pluralize(n, ['гость', 'гостя', 'гостей']) }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label>Удобства</label>
-                        <div class="amenities-checkboxes">
-                            <label v-for="amenity in allAmenities" :key="amenity">
-                                <input
-                                    type="checkbox"
-                                    v-model="filters.amenities"
-                                    :value="amenity"
-                                >
-                                {{ amenity }}
-                            </label>
+                    <!-- Фильтр по датам -->
+                    <div class="relative">
+                        <div class="absolute -top-3 left-4 bg-white px-2 text-indigo-600 font-medium">Даты проживания
+                        </div>
+                        <div class="border border-gray-200 rounded-xl p-5 pt-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-4 text-sm text-gray-600">
+                                <div class="date-range-picker">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Заезд</label>
+                                    <VueDatePicker
+                                        v-model="filters.checkIn"
+                                        :enable-time-picker="false"
+                                        placeholder="Выберите период"
+                                        format="yyy-MM-dd"
+                                        auto-apply
+                                    />
+                                </div>
+                                <div class="date-range-picker">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Выезд</label>
+                                    <VueDatePicker
+                                        v-model="filters.checkOut"
+                                        :enable-time-picker="false"
+                                        placeholder="Выберите период"
+                                        format="yyy-MM-dd"
+                                        auto-apply
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <!-- Фильтр по гостям -->
+                    <div class="relative">
+                        <div class="absolute -top-3 left-4 bg-white px-2 text-indigo-600 font-medium">Гости</div>
+                        <div class="border border-gray-200 rounded-xl p-5 pt-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <button
+                                        class="counter-btn"
+                                        :class="{ 'opacity-50 cursor-not-allowed': filters.guests <= guestsParams.min }"
+                                        :disabled="filters.guests <= guestsParams.min"
+                                        @click="decrement"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                  d="M20 12H4"></path>
+                                        </svg>
+                                    </button>
 
-                <div class="sorting">
-                    <label>Сортировка:</label>
-                    <select v-model="sortBy">
-                        <option value="price_asc">Цена (по возрастанию)</option>
-                        <option value="price_desc">Цена (по убыванию)</option>
-                        <option value="rating">Рейтинг</option>
-                    </select>
+                                    <span class="counter-value">{{ filters.guests }}</span>
+
+                                    <button
+                                        class="counter-btn"
+                                        :class="{ 'opacity-50 cursor-not-allowed': filters.guests >= guestsParams.max }"
+                                        :disabled="filters.guests >= guestsParams.max"
+                                        @click="increment"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                  d="M20 12H4"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+
 
             <!-- Список номеров -->
             <div class="room-list">
@@ -63,15 +94,21 @@
                     class="room-card"
                 >
                     <div class="room-image">
-                        <img :src="room.main_image" :alt="room.name">
+                        <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
                         <div class="price-badge">{{ formatPrice(room.base_price) }} / ночь</div>
                     </div>
 
                     <div class="room-content">
-                        <h3>{{ room.name }}</h3>
+                        <h3>
+                            <Link :href="route('room.show', room.id)" class="flex items-center space-x-2">
+                                {{ room.name }}
+                            </Link>
+                        </h3>
                         <div class="rating">
-                                                        <span class="stars">{{ renderStars(room.rating) }}</span>
-                                                        <span class="reviews">({{ room.reviews_count }} отзывов)</span>
+                            <span class="stars">{{ renderStars(room.rating) }}</span>
+                            <span class="reviews">
+                                ({{ room.reviewsCnt }} {{ pluralize(room.reviewsCnt, ['отзыв', 'отзыв', 'отзывов']) }})
+                            </span>
                         </div>
                         <p class="description">{{ room.description }}</p>
 
@@ -87,7 +124,8 @@
 
                         <button
                             class="book-button"
-                            @click="openModal(room)"
+                            id="book-button"
+                            @click="openModal(room, $page.props.auth.user)"
                         >
                             Забронировать
                         </button>
@@ -111,7 +149,9 @@
             <BookingModal
                 :show="selectedRoom"
                 :room="selectedRoom"
-                :dates="filters.dates"
+                :disabledDates="disabledDates"
+                :user="$page.props.auth.user"
+
                 @close="selectedRoom = null"
             />
         </div>
@@ -125,11 +165,14 @@ import {route} from "ziggy-js";
 import {Russian} from 'flatpickr/dist/l10n/ru'
 import FlatPickr from "vue-flatpickr-component";
 import BookingModal from "@/Components/BookingModal.vue";
+import {Link} from "@inertiajs/vue3";
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 // Данные
 const filteredRooms = ref([])
 // Список доступных удобств
-const allAmenities = ref([
+const amenitiesList = ref([
     'Wi-Fi',
     'Телевизор',
     'Кондиционер',
@@ -140,12 +183,19 @@ const allAmenities = ref([
 ])
 const loading = ref(false)
 const error = ref(null)
-const selectedRoom = ref(null)
 const errors = ref({})
+const selectedRoom = ref(null)
+
+const guestsParams = ref({
+    min: 1,
+    max: 6,
+    step: 1
+})
 
 // Фильтры и сортировка
 const filters = ref({
-    dates: [],
+    checkIn: null,
+    checkOut: null,
     guests: 2,
     amenities: []
 })
@@ -161,6 +211,17 @@ const dateConfig = {
     locale: Russian
 }
 
+const increment = async () => {
+    if (filters.value.guests < guestsParams.value.max) {
+        filters.value.guests = filters.value.guests + guestsParams.value.step
+    }
+}
+const decrement = async () => {
+    if (filters.value.guests > guestsParams.value.min) {
+        filters.value.guests = filters.value.guests - guestsParams.value.step
+    }
+}
+
 // Загрузка данных
 const loadRooms = async () => {
     try {
@@ -171,12 +232,9 @@ const loadRooms = async () => {
             page: currentPage.value,
             guests: filters.value.guests,
             amenities: filters.value.amenities,
-            sort: sortBy.value
-        }
-
-        if (filters.value.dates.length === 2) {
-            params.start_date = filters.value.dates[0]
-            params.end_date = filters.value.dates[1]
+            sort: sortBy.value,
+            checkIn: filters.value.checkIn,
+            checkOut: filters.value.checkOut,
         }
 
         const response = await axios.get(route('api.rooms.list'), {params})
@@ -210,8 +268,12 @@ const renderStars = (rating) => {
     return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
 }
 
-const openModal = (room) => {
-    selectedRoom.value = room;
+const openModal = (room, user) => {
+    if (user) {
+        selectedRoom.value = room
+    } else {
+        window.location.href = route('login')
+    }
 }
 
 // Следим за изменениями фильтров
@@ -352,13 +414,41 @@ loadRooms()
     border-color: #2196f3;
 }
 
-@media (max-width: 768px) {
-    .catalog-controls {
-        grid-template-columns: 1fr;
-    }
+.counter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
 
-    .amenities-checkboxes {
-        grid-template-columns: 1fr;
-    }
+.counter-btn:not(:disabled):hover {
+    background-color: #f3f4f6;
+}
+
+.counter-btn:first-child {
+    border-right: 1px solid #e5e7eb;
+}
+
+.counter-btn:last-child {
+    border-left: 1px solid #e5e7eb;
+}
+
+.counter-value {
+    display: inline-block;
+    min-width: 40px;
+    padding: 0 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2937;
+    transition: all 0.3s ease;
+}
+
+.counter-icon {
+    width: 16px;
+    height: 16px;
 }
 </style>

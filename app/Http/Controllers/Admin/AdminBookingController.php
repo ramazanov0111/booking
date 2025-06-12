@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
+use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class AdminBookingController extends Controller
 {
@@ -37,32 +40,57 @@ class AdminBookingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreBookingRequest $request)
+    public function store(StoreBookingRequest $request): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validated();
+
+            $booking = Booking::create($validated);
+
+            return response()->json([
+                'message' => 'Бронирование успешно добавлено!',
+                'data' => new BookingResource($booking)
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Добавьте логирование ошибки
+            Log::error('Booking creation error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Booking $booking)
+    public function show(Booking $booking): JsonResponse
     {
-        //
+        return response()->json([
+            'data' => new BookingResource($booking)
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBookingRequest $request, Booking $booking)
+    public function update(UpdateBookingRequest $request, Booking $booking): JsonResponse
     {
-        //
+        try {
+            $booking->update($request->validated());
+
+            return response()->json($booking);
+        } catch (\Exception $e) {
+            // Добавьте логирование ошибки
+            Log::error('Booking updating error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Booking $booking)
+    public function destroy(Booking $booking): Response
     {
-        //
+        $booking->delete();
+        return response()->noContent();
     }
 }

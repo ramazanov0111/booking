@@ -17,20 +17,16 @@
                              active-class="text-blue-600 font-semibold">
                         Номера
                     </NavLink>
-                    <NavLink :href="route('about')" :active="route().current('about')" class="nav-link"
+                    <NavLink v-if="$page.props.auth.user" :href="route('booking', $page.props.auth.user.id)" :active="route().current('booking')" class="nav-link"
                              active-class="text-blue-600 font-semibold">
-                        О нас
-                    </NavLink>
-                    <NavLink :href="route('about')" :active="route().current('about')" class="nav-link"
-                             active-class="text-blue-600 font-semibold">
-                        Контакты
+                        Мои бронирования
                     </NavLink>
                 </div>
 
                 <!-- Правая часть (авторизация/профиль) -->
                 <div class="flex items-center space-x-4">
                     <template v-if="$page.props.auth.user">
-                        <NavLink :href="route('profile.show')" class="flex items-center space-x-2 hover:text-blue-600">
+                        <NavLink :href="route('guest.profile')" class="flex items-center space-x-2 hover:text-blue-600">
                             <i class="fas fa-user-circle text-xl"></i>
                             <span>{{ $page.props.auth.user.name }}</span>
                         </NavLink>
@@ -78,15 +74,10 @@
                              @click="isMobileMenuOpen = false">
                         Номера
                     </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('about')" :active="route().current('about')" class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
+                    <ResponsiveNavLink v-if="$page.props.auth.user" :href="route('booking', $page.props.auth.user.id)" :active="route().current('booking')" class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
                              active-class="text-blue-600 font-semibold"
                              @click="isMobileMenuOpen = false">
-                        О нас
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('about')" :active="route().current('about')" class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
-                             active-class="text-blue-600 font-semibold"
-                             @click="isMobileMenuOpen = false">
-                        Контакты
+                        Мои бронирования
                     </ResponsiveNavLink>
                 </div>
             </div>
@@ -117,16 +108,15 @@ export default {
             navItems: [
                 { title: 'Главная', path: '/' },
                 { title: 'Номера', path: '/rooms' },
-                { title: 'О нас', path: '/about' },
-                { title: 'Контакты', path: '/about' }
+                { title: 'Мои бронирования', path: '/booking' },
             ]
         }
     },
     methods: {
         route,
         async logout() {
-            await this.$store.dispatch('logout')
-            this.$router.push('/login')
+            router.post(route('logout'));
+            // router.get(route('login'));
         }
     }
 }

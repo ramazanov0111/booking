@@ -14,6 +14,17 @@ Route::middleware([
     })->name('dashboard');
 
     Route::prefix('proger')->group(function (){
+        Route::prefix('users')->group(function (){
+            Route::get('/', function () {
+                return Inertia::render('Admin/UserList');
+            })->name('users.list');
+            Route::get('/edit/{user}', function () {
+                return Inertia::render('Admin/UserForm');
+            })->name('users.edit');
+            Route::get('/create', function () {
+                return Inertia::render('Admin/UserForm');
+            })->name('users.create');
+        });
         Route::prefix('rooms')->group(function (){
             Route::get('/', function () {
                 return Inertia::render('Admin/RoomIndex');
@@ -41,10 +52,10 @@ Route::middleware([
                 return Inertia::render('Admin/BookingList');
             })->name('booking.list');
             Route::get('/edit/{booking}', function () {
-                return Inertia::render('Admin/BookingShow');
+                return Inertia::render('Admin/BookingForm');
             })->name('booking.edit');
             Route::get('/create', function () {
-                return Inertia::render('Admin/BookingShow');
+                return Inertia::render('Admin/BookingForm');
             })->name('booking.create');
         });
         Route::prefix('reviews')->group(function (){
@@ -54,13 +65,13 @@ Route::middleware([
         });
         Route::prefix('blocked_dates')->group(function (){
             Route::get('/', function () {
-                return Inertia::render('Admin/BlockedDateIndex');
+                return Inertia::render('Admin/BlockedDateList');
             })->name('blocked_dates.list');
             Route::get('/edit/{blocked_date}', function () {
-                return Inertia::render('Admin/BlockedDateShow');
+                return Inertia::render('Admin/BlockedDateForm');
             })->name('blocked_dates.edit');
             Route::get('/create', function () {
-                return Inertia::render('Admin/BlockedDateShow');
+                return Inertia::render('Admin/BlockedDateForm');
             })->name('blocked_dates.create');
         });
     });
@@ -79,13 +90,20 @@ Route::get('/', function () {
     return Inertia::render('AboutPage');
 })->name('main');
 
-Route::get('/about', function () {
-    return Inertia::render('AboutPage');
-})->name('about');
+Route::get('/booking/{userId}', function ($userId) {
+    return Inertia::render('BookingPage',
+        ['userId' => $userId]
+    );
+})->name('booking');
 
 Route::get('/rooms', function () {
     return Inertia::render('RoomsPage');
 })->name('rooms');
 
+Route::get('/rooms/{room}', function () {
+    return Inertia::render('RoomShow');
+})->name('room.show');
 
-//Route::inertia('/about', 'Pages/AboutPage');
+Route::get('/profile', function () {
+    return Inertia::render('Profile/Guest');
+})->name('guest.profile');

@@ -1,9 +1,9 @@
 <template>
-    <AppLayout title="Prices">
+    <AppLayout title="Заблокированные даты">
 
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Цены
+                Заблокированные даты
             </h2>
         </template>
 
@@ -11,7 +11,7 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Заголовок -->
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Динамическое ценообразование</h1>
+                    <h1 class="text-2xl font-bold">Периоды недоступности номеров для бронирования</h1>
                 </div>
                 <!-- Фильтры и кнопка создания -->
                 <div class="controls">
@@ -36,22 +36,20 @@
                         />
                     </div>
 
-                    <Link :href="route('prices.create')"
+                    <Link :href="route('blocked_dates.create')"
                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        + Новая цена
+                        + Добавить период
                     </Link>
-
                 </div>
 
-                <!-- Таблица цен -->
+                <!-- Таблица периодов -->
                 <div class="bg-white rounded-lg shadow overflow-x-auto">
                     <table>
                         <thead>
                         <tr>
                             <th>Номер</th>
-                            <th>Базовая цена</th>
                             <th>Период</th>
-                            <th>Новая цена</th>
+                            <th>Причина</th>
                             <th>Последнее обновление</th>
                             <th>Действия</th>
                         </tr>
@@ -66,37 +64,25 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="price in prices" :key="price.id">
-                            <td>{{ price.room.name }}</td>
+                        <tr v-for="blocked_date in blocked_dates" :key="blocked_date.id">
+                            <td>{{ blocked_date.room.name }}</td>
 
-                            <td>{{ price.room.base_price }}</td>
+                            <td>{{ formatDate(blocked_date.date_start) }} - {{ formatDate(blocked_date.date_end) }}</td>
 
-                            <td>{{ formatDate(price.start_date) }} - {{ formatDate(price.end_date) }}</td>
+                            <td>{{ blocked_date.reason }}</td>
 
-                            <td>{{ price.price }}</td>
-
-                            <td>{{ formatDate(price.updated_at) }}</td>
+                            <td>{{ formatDate(blocked_date.updated_at) }}</td>
 
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                <Link :href="route('prices.edit', price.id)" class="text-blue-600 hover:text-blue-900">
+                                <Link :href="route('blocked_dates.edit', blocked_date.id)" class="text-blue-600 hover:text-blue-900">
                                     <i class="fas fa-edit"></i>
                                 </Link>
                                 <button
-                                    @click="deletePrice(price.id)"
+                                    @click="deletePeriod(blocked_date.id)"
                                     class="text-red-600 hover:text-red-900"
                                 >
                                     <i class="fas fa-trash"></i>
                                 </button>
-
-<!--                                <Link :href="route('rooms.edit', room)" class="text-blue-600 hover:text-blue-900">-->
-<!--                                    <i class="fas fa-edit"></i>-->
-<!--                                </Link>-->
-<!--                                <button-->
-<!--                                    @click="deleteRoom(room.id)"-->
-<!--                                    class="text-red-600 hover:text-red-900"-->
-<!--                                >-->
-<!--                                    <i class="fas fa-trash"></i>-->
-<!--                                </button>-->
                             </td>
                         </tr>
                         </tbody>
@@ -131,7 +117,7 @@ import {Link} from "@inertiajs/vue3";
 flatpickr.localize(Russian)
 
 // Данные
-const prices = ref([])
+const blocked_dates = ref([])
 const rooms = ref([])
 const filters = ref({
     room_id: '',
@@ -162,10 +148,8 @@ const loadData = async () => {
             })
         }
 
-        console.log(params);
-
-        const response = await axios.get(route('prices.index'), {params})
-        prices.value = response.data.data
+        const response = await axios.get(route('blocked_dates.index'), {params})
+        blocked_dates.value = response.data.data
         totalPages.value = response.data.last_page
     } finally {
         loading.value = false
@@ -183,10 +167,10 @@ const loadRooms = async () => {
 }
 
 // Удаление цены
-const deletePrice = async (price) => {
-    if (!confirm('Удалить эту цену?')) return
+const deletePeriod = async (blocked_date) => {
+    if (!confirm('Удалить этот период?')) return
     try {
-        await axios.delete(route('prices.destroy', price.id))
+        await axios.delete(route('blocked_dates.destroy', blocked_date.id))
         await loadData()
     } catch (error) {
         console.error('Ошибка удаления:', error)

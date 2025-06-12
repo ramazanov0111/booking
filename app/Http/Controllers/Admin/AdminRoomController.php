@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
 use App\Models\Room;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class AdminRoomController extends Controller
 {
@@ -85,5 +88,21 @@ class AdminRoomController extends Controller
     {
         $room->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function uploadFile(Request $request, Room $room): JsonResponse
+    {
+        $file = $request->file('room_image'); // Получение файла
+
+        $data['room_image'] = Storage::disk('public')->put('/images', $file);
+
+        $room->update($data);
+
+        return response()->json([
+            'message' => 'Файл добавлен'
+        ],204);
     }
 }
