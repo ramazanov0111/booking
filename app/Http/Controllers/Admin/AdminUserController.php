@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Fortify\PasswordValidationRules;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Jetstream;
 
 class AdminUserController extends Controller
 {
     use PasswordValidationRules;
+
     /**
      * Display a listing of the resource.
      */
@@ -24,7 +29,7 @@ class AdminUserController extends Controller
             ->paginate(10);
 
         return response()->json([
-            'data' => $users->items(),
+            'data' => UserResource::collection($users->items()),
             'meta' => [
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),
@@ -35,22 +40,24 @@ class AdminUserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        Validator::make((array)$request, [
-            'name' => ['required', 'string', 'max:255'],
-            'lastname' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => $this->passwordRules(),
-            'phone' => ['string', 'max:12']
-        ])->validate();
+        $validated = $request->validated();
 
-        return User::create([
-            'name' => $request['name'],
-            'lastname' => $request['lastname'],
-            'email' => $request['email'],
-            'password' => Hash::make($request['password']),
+        $user = User::create([
+            'name' => $validated['name'],
+            'lastname' => $validated['lastname'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'role' => $validated['role'],
+            'status' => $validated['status'],
         ]);
+
+        return response()->json([
+            'message' => 'Пользователь успешно создан',
+            'data' => new UserResource($user)
+        ], 201);
     }
 
     /**
@@ -59,16 +66,19 @@ class AdminUserController extends Controller
     public function show(User $user): JsonResponse
     {
         return response()->json([
-            'data' => $user
+            'data' => new UserResource($user)
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         $validated = $request->validated();
+        if (isset($validated['new_password'])) {
+            $validated['password'] = Hash::make($validated['new_password']);
+        }
 
         $user->update($validated);
 
