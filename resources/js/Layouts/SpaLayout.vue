@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import SpaHeader from '@/components/SpaHeader.vue'
-import SpaFooter from '@/components/SpaFooter.vue'
+import SpaHeader from '@/Components/SpaHeader.vue'
+import SpaFooter from '@/Components/SpaFooter.vue'
 import 'flatpickr/dist/flatpickr.min.css';
 
 export default {

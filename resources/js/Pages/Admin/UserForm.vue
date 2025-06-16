@@ -83,7 +83,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <InputLabel for="password_confirmation" value="Подтверждение пароля" />
+                            <InputLabel for="password_confirmation" value="Подтверждение пароля"/>
                             <TextInput
                                 id="password_confirmation"
                                 v-model="form.password_confirmation"
@@ -91,20 +91,20 @@
                                 class="mt-1 block w-full"
                                 autocomplete="new-password"
                             />
-                            <InputError class="mt-2" :message="errors.password_confirmation" />
+                            <InputError class="mt-2" :message="errors.password_confirmation"/>
                         </div>
 
                         <!-- Номер телефона -->
                         <div class="mt-4">
                             <InputLabel for="phone" value="Телефон"/>
-                            <TextInput
-                                id="phone"
-                                v-model="form.phone"
-                                type="text"
-                                class="mt-1 block w-full"
-                                placeholder="+7 (___) ___ __ __"
-                                @input="change"
-                            />
+                                                        <TextInput
+                                                            id="phone"
+                                                            v-model="form.phone"
+                                                            type="text"
+                                                            class="mt-1 block w-full"
+                                                            placeholder="+7 (___) ___ __ __"
+                                                            @input="change"
+                                                        />
                             <InputError class="mt-2" :message="errors.phone"/>
                         </div>
 
@@ -157,8 +157,7 @@ import {route} from "ziggy-js";
 import InputLabel from "../../Components/InputLabel.vue";
 import InputError from "../../Components/InputError.vue";
 import TextInput from "../../Components/TextInput.vue";
-import Checkbox from "../../Components/Checkbox.vue";
-import Inputmask from "inputmask";
+import Inputmask from 'inputmask/dist/inputmask.es6.js';
 
 const isEditMode = computed(() => !!route().params.user)
 const loading = ref(false)

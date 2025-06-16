@@ -6,7 +6,7 @@
             <h1 class="title">Добро пожаловать в наш гостевой дом!</h1>
             <div class="content">
                 <img
-                    src="../../../public/build/assets/dom1.jpg"
+                    src="../../../public/images/dom1.jpg"
                     alt="Наш гостевой дом"
                     class="main-image"
                 >
@@ -50,91 +50,6 @@
                     referrerpolicy="no-referrer-when-downgrade"
                 ></iframe>
             </div>
-        </section>
-
-        <!-- Отзывы -->
-        <section class="reviews-section">
-            <h2 class="section-title">Отзывы наших гостей</h2>
-            <div class="reviews-list">
-                <div
-                    v-for="(review, index) in reviews"
-                    :key="index"
-                    class="review-card"
-                >
-                    <div class="review-header">
-                        <span class="author">{{ review.author }}</span>
-                        <div class="rating">
-                            <i
-                                v-for="star in 5"
-                                :key="star"
-                                class="fas fa-star"
-                                :class="{ 'active': star <= review.rating }"
-                            ></i>
-                        </div>
-                    </div>
-                    <p class="review-text">{{ review.text }}</p>
-                    <span class="review-date">{{ formatDate(review.date) }}</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Форма обратной связи -->
-        <section class="feedback-section">
-            <h2 class="section-title">Оставьте отзыв</h2>
-            <form @submit.prevent="submitFeedback" class="feedback-form">
-                <div class="form-group">
-                    <label for="name">Ваше имя:</label>
-                    <input
-                        type="text"
-                        id="name"
-                        v-model="feedbackForm.name"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        v-model="feedbackForm.email"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label>Оценка:</label>
-                    <div class="rating-input">
-                        <button
-                            type="button"
-                            v-for="star in 5"
-                            :key="star"
-                            @click="feedbackForm.rating = star"
-                            :class="{ 'active': star <= feedbackForm.rating }"
-                        >
-                            <i class="fas fa-star"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="message">Сообщение:</label>
-                    <textarea
-                        id="message"
-                        v-model="feedbackForm.message"
-                        rows="5"
-                        required
-                    ></textarea>
-                </div>
-
-                <button
-                    type="submit"
-                    class="submit-btn"
-                    :disabled="isSubmitting"
-                >
-                    {{ isSubmitting ? 'Отправка...' : 'Отправить отзыв' }}
-                </button>
-            </form>
         </section>
     </div>
     </SpaLayout>
