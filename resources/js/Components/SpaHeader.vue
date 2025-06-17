@@ -36,7 +36,7 @@
                                 <NavLink :href="route('guest.profile')"
                                          class="flex items-center space-x-2 hover:text-blue-600">
                                     <i class="fas fa-user-circle text-xl"></i>
-                                    <span>{{ $page.props.auth.user.name }}</span>
+                                    <span class="pl-1">{{ $page.props.auth.user.name }}</span>
                                 </NavLink>
                                 <button
                                     @click="logout"
@@ -60,30 +60,32 @@
                 </div>
                 <!-- Мобильное меню -->
 
-                <div class="md:hidden flex justify-between h-16">
-                    <template v-if="$page.props.auth.user">
-                        <NavLink :href="route('guest.profile')"
-                                 class="flex items-center space-x-2 hover:text-blue-600">
-                            <i class="fas fa-user-circle text-xl"></i>
-                            <span>{{ $page.props.auth.user.name }}</span>
-                        </NavLink>
-                        <button
-                            @click="logout"
-                            class="ml-4 px-4 py-2 rounded-lg hover:bg-gray-200"
-                        >
-                            Выйти
-                        </button>
-                    </template>
-                    <template v-else>
-                        <NavLink :href="route('login')" :active="route().current('login')"
-                                 class="px-4 py-2 hover:text-blue-600">
-                            Вход
-                        </NavLink>
-                        <NavLink :href="route('register')" :active="route().current('register')"
-                                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Регистрация
-                        </NavLink>
-                    </template>
+                <div class="md:hidden sm:flex sm:items-center sm:ms-6">
+                        <div class="md:hidden mt-4 space-x-2 sm:-my-px sm:ms-10 sm:flex items-center">
+                            <template v-if="$page.props.auth.user">
+                                <NavLink :href="route('guest.profile')"
+                                         class="px-4 py-2 hover:text-blue-600">
+                                    <i class="fas fa-user-circle text-xl"></i>
+                                    <span class="pl-1">{{ $page.props.auth.user.name }}</span>
+                                </NavLink>
+                                <button
+                                    @click="logout"
+                                    class="ml-4 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-300"
+                                >
+                                    Выйти
+                                </button>
+                            </template>
+                            <template v-else>
+                                <NavLink :href="route('login')" :active="route().current('login')"
+                                         class="px-4 py-2 hover:text-blue-600">
+                                    Вход
+                                </NavLink>
+                                <NavLink :href="route('register')" :active="route().current('register')"
+                                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                    Регистрация
+                                </NavLink>
+                            </template>
+                    </div>
                 </div>
 
                 <button
@@ -102,20 +104,20 @@
         >
             <div class="container px-4 py-4">
                 <DropdownLink :href="route('main')" :active="route().current('main')"
-                                   class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
-                                   active-class="text-blue-600 font-semibold">
+                              class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
+                              active-class="text-blue-600 font-semibold">
                     Главная
                 </DropdownLink>
                 <DropdownLink :href="route('rooms')" :active="route().current('rooms')"
-                                   class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
-                                   active-class="text-blue-600 font-semibold">
+                              class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
+                              active-class="text-blue-600 font-semibold">
                     Номера
                 </DropdownLink>
                 <DropdownLink v-if="$page.props.auth.user"
-                                   :href="route('booking', $page.props.auth.user.id)"
-                                   :active="route().current('booking')"
-                                   class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
-                                   active-class="text-blue-600 font-semibold">
+                              :href="route('booking', $page.props.auth.user.id)"
+                              :active="route().current('booking')"
+                              class="block py-2 px-4 hover:bg-gray-50 rounded-lg"
+                              active-class="text-blue-600 font-semibold">
                     Мои бронирования
                 </DropdownLink>
             </div>
