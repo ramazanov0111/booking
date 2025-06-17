@@ -9,11 +9,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Laravel\Jetstream\Jetstream;
 
 class AdminUserController extends Controller
 {
@@ -47,6 +43,7 @@ class AdminUserController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'lastname' => $validated['lastname'],
+            'login' => $validated['login'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],

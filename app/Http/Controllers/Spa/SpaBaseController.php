@@ -84,7 +84,7 @@ class SpaBaseController extends Controller
             );
 
             foreach ($period as $key => $value) {
-                $dates[] = $value->format('Y-m-d');
+                $dates[] = $value->format('d-m-Y');
             }
         }
 
@@ -109,7 +109,7 @@ class SpaBaseController extends Controller
             );
 
             foreach ($period as $key => $value) {
-                $dates[] = $value->format('Y-m-d');
+                $dates[] = $value->format('d-m-Y');
             }
         }
 

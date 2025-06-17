@@ -31,8 +31,8 @@ class RoomResource extends JsonResource
             'room_image' => $this->room_image,
             'imageUrl' => $this->imageUrl,
             'amenities' => json_decode($this->amenities),
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at->format('d-m-Y H:i'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
             'prices' => $this->prices,
             'rating' => $rating,
             'reviewsCnt' => $reviewsCnt

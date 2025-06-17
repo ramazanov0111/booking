@@ -106,7 +106,7 @@ const isSubmitting = ref(false)
 // Конфигурация календаря
 const dateConfig = ref({
     mode: 'range',
-    dateFormat: 'Y-m-d',
+    dateFormat: 'd-m-Y',
     locale: Russian,
     allowInput: true
 })

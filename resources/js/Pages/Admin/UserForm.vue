@@ -46,6 +46,17 @@
                             />
                             <InputError class="mt-2" :message="errors.lastname"/>
                         </div>
+                        <div class="mt-4">
+                            <InputLabel for="login" value="Логин"/>
+                            <TextInput
+                                id="login"
+                                v-model="form.login"
+                                type="text"
+                                class="mt-1 block w-full"
+                                required
+                            />
+                            <InputError class="mt-2" :message="errors.login"/>
+                        </div>
                         <!-- E-mail -->
                         <div class="mt-4">
                             <InputLabel for="email" value="Email"/>
@@ -108,13 +119,20 @@
                             <InputError class="mt-2" :message="errors.phone"/>
                         </div>
 
-                        <div class="mt-4">
-                            <template v-for="role in roles">
-                                <InputLabel :for="role.key" :value="role.value"/>
-                                <input :id="role.key" type="radio" v-bind:value="role.key" v-model="form.role">
-                            </template>
-                        </div>
+                        <br>
 
+                        <div class="mt-4">
+                            <label>Роль</label>
+                            <select v-model="form.role" required>
+                                <option
+                                    v-for="role in roles"
+                                    :key="role.value"
+                                    :value="role.key"
+                                >
+                                    {{ role.value }}
+                                </option>
+                            </select>
+                        </div>
                         <!-- Удален -->
                         <div class="mt-4">
                             <InputLabel for="deleted" value="Удален"/>
@@ -166,6 +184,7 @@ const loading = ref(false)
 const form = ref({
     name: '',
     lastname: '',
+    login: '',
     email: '',
     password: '',
     new_password: '',
@@ -284,4 +303,19 @@ td {
 tr:hover td {
     @apply bg-gray-50;
 }
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+
 </style>

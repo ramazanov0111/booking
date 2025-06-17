@@ -18,8 +18,8 @@ class BlockedDateResource extends JsonResource
             'date_start' => $this->date_start,
             'date_end' => $this->date_end,
             'reason' => $this->reason,
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at->format('d-m-Y H:i'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
             'room' => $roomData
         ];
     }

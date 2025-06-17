@@ -164,7 +164,7 @@ const loading = ref(false)
 // Конфигурация календаря
 const dateConfig = {
     mode: 'range',
-    dateFormat: 'Y-m-d',
+    dateFormat: 'd-m-Y',
     locale: Russian
 }
 
@@ -261,6 +261,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input {
+    width: 25%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+select {
+    width: 25%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
 
 .controls {
     display: flex;

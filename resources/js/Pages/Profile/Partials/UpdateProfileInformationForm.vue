@@ -17,8 +17,9 @@ const form = useForm({
     _method: 'PUT',
     name: props.user.name,
     lastname: props.user.lastname,
+    login: props.user.login,
     email: props.user.email,
-    photo: null,
+    phone: props.user.phone,
 });
 
 const verificationLinkSent = ref(null);
@@ -129,9 +130,9 @@ const clearPhotoFileInput = () => {
                 <InputError :message="form.errors.photo" class="mt-2" />
             </div>
 
-            <!-- Name -->
+            <!-- Имя -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="name" value="Имя" />
                 <TextInput
                     id="name"
                     v-model="form.name"
@@ -143,9 +144,9 @@ const clearPhotoFileInput = () => {
                 <InputError :message="form.errors.name" class="mt-2" />
             </div>
 
-            <!-- Lastname -->
+            <!-- Фамилия -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="lastname" value="Lastname" />
+                <InputLabel for="lastname" value="Фамилия" />
                 <TextInput
                     id="lastname"
                     v-model="form.lastname"
@@ -157,6 +158,20 @@ const clearPhotoFileInput = () => {
                 <InputError :message="form.errors.lastname" class="mt-2" />
             </div>
 
+            <!-- Логин -->
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="login" value="Логин" />
+                <TextInput
+                    id="login"
+                    v-model="form.login"
+                    type="text"
+                    class="mt-1 block w-full"
+                    required
+                    autocomplete="username"
+                />
+                <InputError :message="form.errors.login" class="mt-2" />
+            </div>
+
             <!-- Email -->
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel for="email" value="Email" />
@@ -166,7 +181,7 @@ const clearPhotoFileInput = () => {
                     type="email"
                     class="mt-1 block w-full"
                     required
-                    autocomplete="username"
+                    autocomplete="email"
                 />
                 <InputError :message="form.errors.email" class="mt-2" />
 
@@ -190,6 +205,19 @@ const clearPhotoFileInput = () => {
                     </div>
                 </div>
             </div>
+
+            <!-- Телефон -->
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="phone" value="Телефон" />
+                <TextInput
+                    id="phone"
+                    v-model="form.phone"
+                    type="text"
+                    class="mt-1 block w-full"
+                    required
+                />
+                <InputError :message="form.errors.phone" class="mt-2" />
+            </div>
         </template>
 
         <template #actions>
@@ -198,7 +226,7 @@ const clearPhotoFileInput = () => {
             </ActionMessage>
 
             <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                Save
+                Сохранить
             </PrimaryButton>
         </template>
     </FormSection>
