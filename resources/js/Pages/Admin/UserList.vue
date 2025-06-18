@@ -25,6 +25,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Имя</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Фамилия</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Логин</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Телефон</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
@@ -49,6 +50,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ user.lastname }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-medium text-gray-900">{{ user.login }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {{ user.email }}
@@ -163,4 +167,25 @@ td {
 tr:hover td {
     @apply bg-gray-50;
 }
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input {
+    width: 40%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+select {
+    width: 25%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
 </style>

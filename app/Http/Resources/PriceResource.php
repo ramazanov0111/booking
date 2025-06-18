@@ -18,8 +18,8 @@ class PriceResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'price' => $this->price,
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at->format('d-m-Y H:i'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
             'room' => $roomData
         ];
     }

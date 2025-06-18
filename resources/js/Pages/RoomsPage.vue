@@ -110,7 +110,6 @@
                                 ({{ room.reviewsCnt }} {{ pluralize(room.reviewsCnt, ['отзыв', 'отзыв', 'отзывов']) }})
                             </span>
                         </div>
-                        <p class="description">{{ room.description }}</p>
 
                         <div class="amenities">
                             <span
@@ -175,6 +174,7 @@ const filteredRooms = ref([])
 const amenitiesList = ref([
     'Wi-Fi',
     'Телевизор',
+    'Холодильник',
     'Кондиционер',
     'Мини-бар',
     'Сейф',
@@ -207,7 +207,7 @@ const totalPages = ref(1)
 // Конфигурация календаря
 const dateConfig = {
     mode: 'range',
-    dateFormat: 'Y-m-d',
+    dateFormat: 'd-m-Y',
     locale: Russian
 }
 

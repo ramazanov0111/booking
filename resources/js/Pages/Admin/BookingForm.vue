@@ -55,7 +55,7 @@
                                 v-model="checkInDate"
                                 :disabled-dates="disabledDates"
                                 :enable-time-picker="false"
-                                format="yyy-MM-dd"
+                                format="dd-MM-yyy"
                                 auto-apply
                                 @on-change="loadPrice"
                             />
@@ -66,7 +66,7 @@
                                 v-model="checkOutDate"
                                 :disabled-dates="disabledDates"
                                 :enable-time-picker="false"
-                                format="yyy-MM-dd"
+                                format="dd-MM-yyy"
                                 auto-apply
                                 @on-change="loadPrice"
                             />

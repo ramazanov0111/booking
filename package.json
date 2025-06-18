@@ -28,6 +28,7 @@
         "@inertiajs/progress": "^0.1.2",
         "@vuepic/vue-datepicker": "^11.0.2",
         "flatpickr": "^4.6.13",
+        "inputmask": "^5.0.9",
         "pinia": "^3.0.2",
         "vue-flatpickr-component": "^12.0.0",
         "vue-router": "^4.5.1",

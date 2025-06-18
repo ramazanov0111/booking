@@ -238,6 +238,7 @@ const router = useRouter()
 
 const isEditMode = computed(() => !!route().params.room)
 const loading = ref(false)
+const savedRoomId = ref(null)
 
 // Данные формы
 const form = ref({
@@ -254,6 +255,7 @@ const form = ref({
 const amenitiesList = ref([
     'Wi-Fi',
     'Телевизор',
+    'Холодильник',
     'Кондиционер',
     'Мини-бар',
     'Сейф',
@@ -263,6 +265,7 @@ const amenitiesList = ref([
 
 
 const previewImage = ref('');
+const file = ref(null);
 
 // Ошибки валидации
 const errors = ref({
@@ -284,9 +287,6 @@ const loadRoomData = async () => {
             ...data.data,
             amenities: data.data.amenities || []
         }
-        // previewImage.value = URL.createObjectURL(data.data.imageUrl);
-
-        console.log(form.value)
 
         prices.value = data.data.prices || [];
     } catch (error) {
@@ -339,24 +339,15 @@ const deletePrice = async (price) => {
 }
 
 const uploadFile = async (e) => {
-    const file = e.target.files[0];
-    const formData = new FormData();
+    if (e.target.files) {
+        file.value = e.target.files[0];
 
-    formData.append('room_image', file); // Ключ должен совпадать с именем в Laravel
-
-    previewImage.value = URL.createObjectURL(file);
-
-    try {
-        const response = await axios.post(route('room.upload_file', room), formData);
-        console.log('Успех:', response.data);
-        // await loadRoomData()
-    } catch (error) {
-        console.error('Ошибка:', error.response);
+        previewImage.value = URL.createObjectURL(file.value);
     }
 }
 
 // Отправка формы
-const handleSubmit = async () => {
+const handleSubmit = async (e) => {
     if (!validateForm()) return
 
     loading.value = true
@@ -369,8 +360,22 @@ const handleSubmit = async () => {
         if (isEditMode.value) {
             await axios.put(route('rooms.update', room), payload)
         } else {
-            await axios.post(route('rooms.store'), payload)
+            const response = await axios.post(route('rooms.store'), payload)
+            savedRoomId.value = response.data.data.id;
         }
+
+        const roomId = isEditMode.value ? room : savedRoomId.value;
+        const formData = new FormData();
+
+        formData.append('room_image', file.value); // Ключ должен совпадать с именем в Laravel
+
+        try {
+            const response = await axios.post(route('room.upload_file', roomId), formData);
+            console.log('Успех:', response.data);
+        } catch (error) {
+            console.error('Ошибка:', error.response);
+        }
+
         window.location.href = route('rooms.list');
     } catch (error) {
         console.error('Ошибка сохранения:', error)

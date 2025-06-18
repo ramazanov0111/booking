@@ -43,7 +43,7 @@ const logout = () => {
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')" class="flex items-center space-x-2">
+                                <Link :href="route('main')" class="flex items-center space-x-2">
                                     <ApplicationMark class="block h-12 w-auto" />
                                 </Link>
                             </div>
@@ -97,15 +97,11 @@ const logout = () => {
                                     <template #content>
                                         <!-- Account Management -->
                                         <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Manage Account
+                                            Управление аккаунтом
                                         </div>
 
                                         <DropdownLink :href="route('profile.show')">
-                                            Profile
-                                        </DropdownLink>
-
-                                        <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
-                                            API Tokens
+                                            Профиль
                                         </DropdownLink>
 
                                         <div class="border-t border-gray-200" />
@@ -113,7 +109,7 @@ const logout = () => {
                                         <!-- Authentication -->
                                         <form @submit.prevent="logout">
                                             <DropdownLink as="button">
-                                                Log Out
+                                                Выйти
                                             </DropdownLink>
                                         </form>
                                     </template>
@@ -152,11 +148,6 @@ const logout = () => {
 
                 <!-- Responsive Navigation Menu -->
                 <div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
-                    <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
 
                     <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-1 border-t border-gray-200">
@@ -167,69 +158,45 @@ const logout = () => {
 
                             <div>
                                 <div class="font-medium text-base text-gray-800">
-                                    {{ $page.props.auth.user.name }}
-                                </div>
-                                <div class="font-medium text-sm text-gray-500">
-                                    {{ $page.props.auth.user.email }}
+                                    {{ $page.props.auth.user.name }} {{ $page.props.auth.user.lastname }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                Profile
-                            </ResponsiveNavLink>
+                        <div class="border-t mt-3 border-gray-200" />
 
-                            <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">
-                                API Tokens
-                            </ResponsiveNavLink>
+                        <div class="ml-1 mt-3 space-y-1">
+                            <DropdownLink :href="route('profile.show')" :active="route().current('profile.show')">
+                                Профиль
+                            </DropdownLink>
+                            <DropdownLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                Dashboard
+                            </DropdownLink>
+                            <DropdownLink :href="route('users.list')" :active="route().current('users.list')">
+                                Пользователи
+                            </DropdownLink>
+                            <DropdownLink :href="route('rooms.list')" :active="route().current('rooms.list')">
+                                Номера
+                            </DropdownLink>
+                            <DropdownLink :href="route('rooms.list')" :active="route().current('rooms.list')">
+                                Цены
+                            </DropdownLink>
+                            <DropdownLink :href="route('rooms.list')" :active="route().current('rooms.list')">
+                                Бронирования
+                            </DropdownLink>
+                            <DropdownLink :href="route('rooms.list')" :active="route().current('rooms.list')">
+                                Отзывы
+                            </DropdownLink>
+                            <DropdownLink :href="route('blocked_dates.list')" :active="route().current('blocked_dates.list')">
+                                Заблокированные даты
+                            </DropdownLink>
 
                             <!-- Authentication -->
                             <form method="POST" @submit.prevent="logout">
-                                <ResponsiveNavLink as="button">
-                                    Log Out
-                                </ResponsiveNavLink>
+                                <DropdownLink as="button">
+                                    Выйти
+                                </DropdownLink>
                             </form>
-
-                            <!-- Team Management -->
-                            <template v-if="$page.props.jetstream.hasTeamFeatures">
-                                <div class="border-t border-gray-200" />
-
-                                <div class="block px-4 py-2 text-xs text-gray-400">
-                                    Manage Team
-                                </div>
-
-                                <!-- Team Settings -->
-                                <ResponsiveNavLink :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
-                                    Team Settings
-                                </ResponsiveNavLink>
-
-                                <ResponsiveNavLink v-if="$page.props.jetstream.canCreateTeams" :href="route('teams.create')" :active="route().current('teams.create')">
-                                    Create New Team
-                                </ResponsiveNavLink>
-
-                                <!-- Team Switcher -->
-                                <template v-if="$page.props.auth.user.all_teams.length > 1">
-                                    <div class="border-t border-gray-200" />
-
-                                    <div class="block px-4 py-2 text-xs text-gray-400">
-                                        Switch Teams
-                                    </div>
-
-                                    <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
-                                        <form @submit.prevent="switchToTeam(team)">
-                                            <ResponsiveNavLink as="button">
-                                                <div class="flex items-center">
-                                                    <svg v-if="team.id == $page.props.auth.user.current_team_id" class="me-2 size-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    <div>{{ team.name }}</div>
-                                                </div>
-                                            </ResponsiveNavLink>
-                                        </form>
-                                    </template>
-                                </template>
-                            </template>
                         </div>
                     </div>
                 </div>

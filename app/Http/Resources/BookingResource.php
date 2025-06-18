@@ -18,14 +18,14 @@ class BookingResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'room_id' => $this->room_id,
-            'check_in' => $this->check_in->format('Y-m-d'),
-            'check_out' => $this->check_out->format('Y-m-d'),
+            'check_in' => $this->check_in,
+            'check_out' => $this->check_out,
             'total_price' => $this->total_price,
             'nights' => $nights,
             'status' => $this->status,
             'payment_method' => $this->payment_method,
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at->format('d-m-Y H:i'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
             'room' => $roomData
         ];
     }

@@ -118,9 +118,9 @@ const loadData = async () => {
 // Форматирование данных
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('ru-RU', {
-        day: 'numeric',
+        year: 'numeric',
         month: 'long',
-        year: 'numeric'
+        day: 'numeric'
     })
 }
 

@@ -1,21 +1,23 @@
 <template>
-    <div class="min-h-screen flex flex-col">
-        <!-- Шапка -->
-        <SpaHeader />
+    <div>
+        <div class="min-h-screen bg-gray-100">
+            <!-- Шапка -->
+            <SpaHeader/>
 
-        <!-- Основной контент -->
-        <main class="flex-1">
-            <slot /> <!-- Сюда будет вставляться контент конкретной страницы -->
-        </main>
+            <!-- Основной контент -->
+            <main class="flex-1">
+                <slot/> <!-- Сюда будет вставляться контент конкретной страницы -->
+            </main>
 
-        <!-- Подвал -->
-        <SpaFooter />
+            <!-- Подвал -->
+            <SpaFooter/>
+        </div>
     </div>
 </template>
 
 <script>
-import SpaHeader from '@/components/SpaHeader.vue'
-import SpaFooter from '@/components/SpaFooter.vue'
+import SpaHeader from '@/Components/SpaHeader.vue'
+import SpaFooter from '@/Components/SpaFooter.vue'
 import 'flatpickr/dist/flatpickr.min.css';
 
 export default {
@@ -38,6 +40,7 @@ body {
 .fade-leave-active {
     transition: opacity 0.3s;
 }
+
 .fade-enter,
 .fade-leave-to {
     opacity: 0;

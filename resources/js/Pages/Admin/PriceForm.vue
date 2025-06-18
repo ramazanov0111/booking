@@ -25,7 +25,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label>Номер <span class="required">*</span></label>
-                            <select v-model="form.room_id" required>
+                            <select v-model="room_id" @on-change="loadBasePrice(room_id)" required>
                                 <option
                                     v-for="room in rooms"
                                     :key="room.id"
@@ -41,13 +41,10 @@
                             <label>Базовая цена</label>
                             <input
                                 type="number"
-                                v-model.number="form.base_price"
-                                min="0"
-                                step="100"
+                                v-model.number="base_price"
                                 readonly
                                 disabled
                             >
-                            <span v-if="errors.price" class="error">{{ errors.price }}</span>
                         </div>
 
                         <div class="date-range-picker">
@@ -94,7 +91,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from 'vue'
+import {ref, onMounted, computed, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {Russian} from 'flatpickr/dist/l10n/ru'
 import AppLayout from "../../Layouts/AppLayout.vue";
@@ -108,11 +105,12 @@ const isEditMode = computed(() => !!route().params.price)
 
 // Данные формы
 const form = ref({
-    room_id: null,
-    base_price: null,
     price: 0,
     date_range: []
 })
+
+const base_price = ref(null)
+const room_id = ref(null)
 
 const rooms = ref([])
 const errors = ref({})
@@ -121,7 +119,7 @@ const isSubmitting = ref(false)
 // Конфигурация календаря
 const dateConfig = ref({
     mode: 'range',
-    dateFormat: 'Y-m-d',
+    dateFormat: 'd-m-Y',
     locale: Russian,
     allowInput: true
 })
@@ -140,10 +138,10 @@ const loadInitialData = async () => {
 
         if (isEditMode.value) {
             const {data} = await axios.get(route('prices.show', price))
+            room_id.value = data.data.room_id;
             form.value = {
                 ...data.data,
                 date_range: [data.data.start_date, data.data.end_date],
-                base_price: data.data.room.base_price
             }
         }
     } catch (error) {
@@ -151,6 +149,14 @@ const loadInitialData = async () => {
     }
 }
 
+const loadBasePrice = async (roomId) => {
+    try {
+        const {data} = await axios.get(route('rooms.show', roomId))
+        base_price.value = data.data.base_price
+    } catch (error) {
+    console.error('Ошибка загрузки:', error)
+}
+}
 // Отправка формы
 const handleSubmit = async () => {
     try {
@@ -160,6 +166,7 @@ const handleSubmit = async () => {
         var dates = form.value.date_range.toString().split(" — ");
 
         const payload = {
+            room_id: room_id.value,
             ...form.value,
             start_date: dates[0],
             end_date: dates[1]
@@ -170,8 +177,6 @@ const handleSubmit = async () => {
             : route('prices.store')
 
         const method = isEditMode.value ? 'put' : 'post'
-
-        console.log(method, url, payload)
 
         await axios[method](url, payload)
         window.location.href = route('prices.list')
@@ -187,6 +192,10 @@ const handleSubmit = async () => {
         isSubmitting.value = false
     }
 }
+
+watch([room_id], async () => {
+    await loadBasePrice(room_id.value)
+})
 
 // Инициализация
 onMounted(loadInitialData)

@@ -13,13 +13,14 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'lastname' => $this->lastname,
+            'login' => $this->login,
             'email' => $this->email,
             'password' => $this->password,
             'phone' => $this->phone,
             'role' => $this->role,
             'deleted' => (boolean)$this->deleted,
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at->format('d-m-Y H:i'),
+            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
         ];
     }
 }
