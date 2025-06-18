@@ -315,8 +315,8 @@ const validateForm = () => {
         isValid = false
     }
 
-    if (form.value.base_price < 0) {
-        errors.value.base_price = 'Цена не может быть отрицательной'
+    if (form.value.base_price <= 0) {
+        errors.value.base_price = 'Цена должна быть больше нуля'
         isValid = false
     }
 

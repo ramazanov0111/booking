@@ -25,13 +25,12 @@
                     <!-- Основные параметры -->
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <InputLabel for="name" value="Имя"/>
+                            <InputLabel for="name" value="Имя" />
                             <TextInput
                                 id="name"
                                 v-model="form.name"
                                 type="text"
                                 class="mt-1 block w-full"
-                                required
                             />
                             <InputError class="mt-2" :message="errors.name"/>
                         </div>
@@ -42,7 +41,6 @@
                                 v-model="form.lastname"
                                 type="text"
                                 class="mt-1 block w-full"
-                                required
                             />
                             <InputError class="mt-2" :message="errors.lastname"/>
                         </div>
@@ -53,7 +51,6 @@
                                 v-model="form.login"
                                 type="text"
                                 class="mt-1 block w-full"
-                                required
                             />
                             <InputError class="mt-2" :message="errors.login"/>
                         </div>
@@ -100,7 +97,6 @@
                                 v-model="form.password_confirmation"
                                 type="password"
                                 class="mt-1 block w-full"
-                                autocomplete="new-password"
                             />
                             <InputError class="mt-2" :message="errors.password_confirmation"/>
                         </div>
@@ -142,7 +138,6 @@
                                 type="checkbox"
                                 class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                             >
-                            <InputError class="mt-2" :message="errors.deleted"/>
                         </div>
 
                     </div>
@@ -194,7 +189,16 @@ const form = ref({
     deleted: false,
 });
 
-const errors = ref({});
+// Ошибки валидации
+const errors = ref({
+    name: '',
+    lastname: '',
+    login: '',
+    password: '',
+    new_password: '',
+    password_confirmation: '',
+    phone: '',
+})
 
 const roles = [
     {key: 'admin', value: 'Администратор'},
@@ -222,8 +226,75 @@ const loadUserData = async () => {
     }
 }
 
+// Валидация формы
+const validateForm = () => {
+    let isValid = true
+    const latinRegex = /^[a-zA-Z0-9]+$/;
+
+    errors.value = {
+        name: '',
+        lastname: '',
+        login: '',
+        password: '',
+        new_password: '',
+        password_confirmation: '',
+        phone: '',
+    }
+
+    if (!form.value.name.trim()) {
+        errors.value.name = 'Введите имя пользователя'
+        isValid = false
+    }
+
+    if (!form.value.lastname.trim()) {
+        errors.value.lastname = 'Введите фамилию пользователя'
+        isValid = false
+    }
+
+    if (!form.value.login.trim()) {
+        errors.value.login = 'Введите логин пользователя'
+        isValid = false
+    } else if (!latinRegex.test(form.value.login)) {
+        errors.value.login = 'Логин должен содержать только латиницу и цифры!'
+        isValid = false
+    }
+
+    if (isEditMode.value) {
+        if (form.value.new_password.length < 8) {
+            errors.value.new_password = 'Длина пароля должна быть минимум 8 символов!'
+            isValid = false
+        } else if (!latinRegex.test(form.value.new_password)) {
+            errors.value.new_password = 'Пароль должен содержать только латиницу и цифры!'
+            isValid = false
+        }
+    } else {
+        if (form.value.password.length < 8) {
+            errors.value.password = 'Длина пароля должна быть минимум 8 символов!'
+            isValid = false
+        } else if (!latinRegex.test(form.value.password)) {
+            errors.value.password = 'Пароль должен содержать только латиницу и цифры!'
+            isValid = false
+        }
+    }
+
+    const password = isEditMode.value ? form.value.new_password : form.value.password
+
+    if (password !== form.value.password_confirmation) {
+        errors.value.password_confirmation = 'Пароли должны совпадать!'
+        isValid = false
+    }
+
+    if (form.value.phone.length < 18) {
+        errors.value.phone = 'Длина номер телефона не соответствует формату!'
+        isValid = false
+    }
+
+    return isValid
+}
+
 // Отправка формы
 const handleSubmit = async () => {
+    if (!validateForm()) return
 
     loading.value = true
     const payload = {

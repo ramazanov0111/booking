@@ -25,7 +25,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label>Номер <span class="required">*</span></label>
-                            <select v-model="form.room_id" required>
+                            <select v-model="form.room_id">
                                 <option
                                     v-for="room in rooms"
                                     :key="room.id"
@@ -100,7 +100,6 @@ const form = ref({
 })
 
 const rooms = ref([])
-const errors = ref({})
 const isSubmitting = ref(false)
 
 // Конфигурация календаря
@@ -136,8 +135,44 @@ const loadInitialData = async () => {
     }
 }
 
+// Ошибки валидации
+const errors = ref({
+    room_id: '',
+    reason: '',
+    date_range: ''
+})
+
+// Валидация формы
+const validateForm = () => {
+    let isValid = true
+    errors.value = {
+        room_id: '',
+        reason: '',
+        date_range: ''
+    }
+
+    if (!form.value.room_id) {
+        errors.value.room_id = 'Выберите номер из списка!'
+        isValid = false
+    }
+
+    if (!form.value.reason.trim()) {
+        errors.value.reason = 'Введите причину недоступности номера!'
+        isValid = false
+    }
+
+    if (!form.value.date_range.toString().length) {
+        errors.value.date_range = 'Выберите период действия блокировки!'
+        isValid = false
+    }
+
+    return isValid
+}
+
 // Отправка формы
 const handleSubmit = async () => {
+    if (!validateForm()) return
+
     try {
         isSubmitting.value = true
         errors.value = {}

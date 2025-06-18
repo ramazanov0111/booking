@@ -25,7 +25,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label>Пользователь <span class="required">*</span></label>
-                            <select v-model="form.user_id" required>
+                            <select v-model="form.user_id">
                                 <option
                                     v-for="user in users"
                                     :key="user.id"
@@ -38,7 +38,7 @@
                         </div>
                         <div>
                             <label>Номер <span class="required">*</span></label>
-                            <select v-model="form.room_id" required>
+                            <select v-model="form.room_id">
                                 <option
                                     v-for="room in rooms"
                                     :key="room.id"
@@ -59,6 +59,7 @@
                                 auto-apply
                                 @on-change="loadPrice"
                             />
+                            <span v-if="errors.checkInDate" class="error">{{ errors.checkInDate }}</span>
                         </div>
                         <div class="date-range-picker">
                             <label>Дата выезда <span class="required">*</span></label>
@@ -70,6 +71,7 @@
                                 auto-apply
                                 @on-change="loadPrice"
                             />
+                            <span v-if="errors.checkOutDate" class="error">{{ errors.checkOutDate }}</span>
                         </div>
                         <div>
                             <label>Статус <span class="required">*</span></label>
@@ -167,7 +169,6 @@ const checkOutDate = ref(null)
 const currentPrice = ref(null)
 const rooms = ref([])
 const users = ref([])
-const errors = ref({})
 const isSubmitting = ref(false)
 const disabledDates = ref([])
 const booking = ref([])
@@ -247,8 +248,51 @@ const loadPrice = async () => {
     }
 }
 
+// Ошибки валидации
+const errors = ref({
+    user_id: '',
+    room_id: '',
+    checkInDate: '',
+    checkOutDate: ''
+})
+
+// Валидация формы
+const validateForm = () => {
+    let isValid = true
+    errors.value = {
+        user_id: '',
+        room_id: '',
+        checkInDate: '',
+        checkOutDate: ''
+    }
+
+    if (!form.value.user_id) {
+        errors.value.user_id = 'Выберите пользователя из списка!'
+        isValid = false
+    }
+
+    if (!form.value.room_id) {
+        errors.value.room_id = 'Выберите номер из списка!'
+        isValid = false
+    }
+
+    if (!checkInDate.value) {
+        errors.value.checkInDate = 'Выберите дату заезда!'
+        isValid = false
+    }
+
+    if (!checkOutDate.value) {
+        errors.value.checkOutDate = 'Выберите дату выезда!'
+        isValid = false
+    }
+
+    return isValid
+}
+
 // Отправка формы
 const handleSubmit = async () => {
+    if (!validateForm()) return
+
     try {
         isSubmitting.value = true
         errors.value = {}

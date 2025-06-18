@@ -25,7 +25,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label>Номер <span class="required">*</span></label>
-                            <select v-model="room_id" @on-change="loadBasePrice(room_id)" required>
+                            <select v-model="room_id" @on-change="loadBasePrice(room_id)">
                                 <option
                                     v-for="room in rooms"
                                     :key="room.id"
@@ -63,7 +63,6 @@
                                 v-model.number="form.price"
                                 min="0"
                                 step="100"
-                                required
                             >
                             <span v-if="errors.price" class="error">{{ errors.price }}</span>
                         </div>
@@ -113,7 +112,6 @@ const base_price = ref(null)
 const room_id = ref(null)
 
 const rooms = ref([])
-const errors = ref({})
 const isSubmitting = ref(false)
 
 // Конфигурация календаря
@@ -154,11 +152,50 @@ const loadBasePrice = async (roomId) => {
         const {data} = await axios.get(route('rooms.show', roomId))
         base_price.value = data.data.base_price
     } catch (error) {
-    console.error('Ошибка загрузки:', error)
+        console.error('Ошибка загрузки:', error)
+    }
 }
+
+// Ошибки валидации
+const errors = ref({
+    room_id: '',
+    price: '',
+    date_range: '',
+})
+
+// Валидация формы
+const validateForm = () => {
+    let isValid = true
+    errors.value = {
+        room_id: '',
+        price: '',
+        date_range: '',
+    }
+
+    if (!room_id.value) {
+        errors.value.room_id = 'Выберите номер из списка!'
+        isValid = false
+    }
+
+    if (form.value.price <= 0) {
+        errors.value.price = 'Цена должна быть больше нуля!'
+        isValid = false
+    } else if (base_price.value === form.value.price) {
+        errors.value.price = 'Новая цена не должна быть равна старой!'
+        isValid = false
+    }
+
+    if (!form.value.date_range.length) {
+        errors.value.date_range = 'Выберите период действия цены!'
+        isValid = false
+    }
+
+    return isValid
 }
 // Отправка формы
 const handleSubmit = async () => {
+    if (!validateForm()) return
+
     try {
         isSubmitting.value = true
         errors.value = {}

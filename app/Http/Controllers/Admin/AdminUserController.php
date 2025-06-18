@@ -48,7 +48,7 @@ class AdminUserController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],
             'role' => $validated['role'],
-            'status' => $validated['status'],
+            'deleted' => $validated['deleted'],
         ]);
 
         return response()->json([
