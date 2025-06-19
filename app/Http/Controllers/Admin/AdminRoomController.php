@@ -87,7 +87,8 @@ class AdminRoomController extends Controller
 
     public function deletePhoto(Room $room): JsonResponse
     {
-        $room->room_image = null;
+        $room->room_image = '';
+        $room->save();
         return response()->json(null, 204);
     }
 

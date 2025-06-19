@@ -121,7 +121,7 @@
                         <div v-if="form.gallery.length" class="previews grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div v-for="item in form.gallery" :key="index" class="gallery-item">
                                 <img :src="item.imageUrl" :alt="item.imageUrl" class="preview-image">
-                                <button @click.prevent="deleteImage(form.id)" class="remove-btn">×</button>
+                                <button @click.prevent="deleteImage(item.id)" class="remove-btn">×</button>
                             </div>
                         </div>
                         <div class="mb-6">
