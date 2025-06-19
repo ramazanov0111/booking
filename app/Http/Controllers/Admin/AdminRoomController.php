@@ -18,10 +18,19 @@ class AdminRoomController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $name = $request->get('name');
+        $minBasePrice = $request->get('base_price_min');
+        $maxBasePrice = $request->get('base_price_max');
+        $capacity = $request->get('capacity');
+        $status = $request->get('status');
+
         $rooms = Room::query()
-            ->where('is_available', true)
+            ->when(!is_null($name), fn($q) => $q->where('name', 'like', '%'.$name.'%'))
+            ->when(!is_null($capacity), fn($q) => $q->where('capacity', (int)$capacity))
+            ->when(!is_null($status), fn($q) => $q->where('is_available', (bool)$status))
+            ->when($minBasePrice && $maxBasePrice, fn ($q) => $q->whereBetween('base_price', [$minBasePrice, $maxBasePrice]))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

@@ -93,7 +93,7 @@
                                 <span class="text-gray-700">Доступен для бронирования</span>
                             </label>
                         </div>
-
+å
                         <!-- Изображение -->
                         <div v-if="form.imageUrl">
                             <label class="block text-gray-700 mb-2">Текущее изображение</label>
@@ -118,7 +118,7 @@
                     <!-- Галерея -->
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2">Галерея</label>
-                        <div v-if="form.gallery.length" class="previews grid grid-cols-1 md:grid-cols-4 gap-2">
+                        <div v-if="form.gallery.length" class="previews grid grid-cols-1 md:grid-cols-5 gap-2">
                             <div v-for="item in form.gallery" :key="index" class="gallery-item">
                                 <img :src="item.imageUrl" :alt="item.imageUrl" class="preview-image">
                                 <button @click.prevent="deleteImage(item.id)" class="remove-btn">×</button>

@@ -17,6 +17,45 @@
                         + Добавить номер
                     </Link>
                 </div>
+                <div class="controls">
+                    <div class="filters">
+                        <input
+                            v-model="filters.name"
+                            type="text"
+                            placeholder="Введите название номера"
+                            class="w-full p-2 border rounded-lg"
+                        >
+                        <input
+                            v-model.number="filters.base_price_min"
+                            type="number"
+                            min="0"
+                            step="100"
+                            placeholder="Цена мин."
+                            class="p-2 border rounded-lg pl-8 number"
+                        >
+                        <input
+                            v-model.number="filters.base_price_max"
+                            type="number"
+                            min="0"
+                            step="100"
+                            placeholder="Цена макс."
+                            class="p-2 border rounded-lg pl-8 number"
+                        >
+                        <input
+                            v-model.number="filters.capacity"
+                            type="number"
+                            min="1"
+                            placeholder="Вместимость"
+                            class="w-full p-2 border rounded-lg number"
+                        >
+                        <select v-model="filters.status" class="filter-select" >
+                            <option value="">Все</option>
+                            <option value="1">Доступен</option>
+                            <option value="0">Не доступен</option>
+                        </select>
+                        <button @click.prevent="fetchRooms" class="bg-blue-600 text-white px-9 py-2 rounded-lg hover:bg-blue-700 transition">Фильтровать</button>
+                    </div>
+                </div>
 
                 <!-- Таблица номеров -->
                 <div class="bg-white rounded-lg shadow overflow-x-auto">
@@ -113,18 +152,34 @@
 import {ref, onMounted} from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from "@/Layouts/AppLayout.vue";
+import {route} from "ziggy-js";
 
 const rooms = ref([])
 const meta = ref({})
 const loading = ref(true)
-
+const filters = ref({
+    name: '',
+    base_price_min: null,
+    base_price_max: null,
+    capacity: null,
+    status: ''
+})
 
 // Получение данных
 const fetchRooms = async (page = 1) => {
     try {
         loading.value = true
 
-        const {data} = await axios.get(route('rooms.index', {'page': page}))
+        const params = {
+            page: page,
+            name: filters.value.name,
+            base_price_min: filters.value.base_price_min,
+            base_price_max: filters.value.base_price_max,
+            capacity: filters.value.capacity,
+            status: filters.value.status
+        }
+
+        const {data} = await axios.get(route('rooms.index'), {params})
 
         rooms.value = data.data
         meta.value = data.meta
@@ -134,6 +189,7 @@ const fetchRooms = async (page = 1) => {
         loading.value = false
     }
 }
+
 
 // Удаление номера
 const deleteRoom = async (id) => {
@@ -174,6 +230,39 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+input {
+    width: 25%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.number {
+    width: 140px;
+}
+
+select {
+    width: 20%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
 table {
     @apply min-w-full divide-y divide-gray-200;
 }
