@@ -47,7 +47,7 @@ class Room extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return url('storage/' . $this->room_image);
+        return $this->room_image ? url('storage/' . $this->room_image) : '';
     }
 
     public function gallery(): HasMany

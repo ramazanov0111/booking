@@ -45,7 +45,7 @@ class RoomImage extends Model
      */
     public function getImageUrlAttribute(): string
     {
-        return url('storage/' . $this->filename);
+        return $this->filename ? url('storage/' . $this->filename) : '';
     }
 
     /**

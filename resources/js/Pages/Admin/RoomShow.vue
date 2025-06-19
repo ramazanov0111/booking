@@ -95,7 +95,7 @@
                         </div>
 
                         <!-- Изображение -->
-                        <div>
+                        <div v-if="form.imageUrl">
                             <label class="block text-gray-700 mb-2">Текущее изображение</label>
                             <div class="preview-item">
                                 <img :src="form.imageUrl" alt="Текущее изображение" class="preview-image">
