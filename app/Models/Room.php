@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasPhoto;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -15,6 +16,18 @@ class Room extends Model
         'amenities' => 'array',
         'is_available' => 'boolean',
         'base_price' => 'float'
+    ];
+
+    // удобства номера
+    public const AMENITIES = [
+        'Wi-Fi',
+        'Телевизор',
+        'Холодильник',
+        'Кондиционер',
+        'Мини-бар',
+        'Сейф',
+        'Фен',
+        'Тапочки'
     ];
 
     public function prices(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -35,5 +48,10 @@ class Room extends Model
     public function getImageUrlAttribute(): string
     {
         return url('storage/' . $this->room_image);
+    }
+
+    public function gallery(): HasMany
+    {
+        return $this->hasMany(RoomImage::class);
     }
 }

@@ -22,10 +22,16 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Левая колонка - описание -->
                 <div class="lg:col-span-2">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="grid grid-cols-2 md:grid-cols-1 gap-4 mb-8">
                         <div class="md:col-span-3">
                             <img :src="roomCur.imageUrl" alt="Основное фото"
                                  class="w-full h-96 object-cover rounded-lg shadow-md">
+                        </div>
+                        <div class="previews grid grid-cols-1 md:grid-cols-5 gap-2">
+                            <div v-for="item in roomCur.gallery" class="gallery-item">
+                                <img :src="item.imageUrl" :alt="item.imageUrl"
+                                     class="preview-image rounded-lg">
+                            </div>
                         </div>
                     </div>
                     <div class="flex justify-between items-start mb-6">
@@ -54,7 +60,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-semibold">Отзывы ({{ reviews.length }})</h2>
                             <button
-                                v-if="!showReviewForm"
+                                v-if="$page.props.auth.user"
                                 @click="showReviewForm = true"
                                 class="text-blue-600 hover:text-blue-800 font-medium"
                             >
@@ -228,29 +234,6 @@ import {route} from "ziggy-js";
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 
-// Данные номера
-const room = ref({
-    id: 'room-1',
-    title: 'Люкс с видом на море',
-    description: 'Просторный номер с панорамным видом на море, оборудованный по последнему слову техники. Идеально подходит для романтического отдыха или деловой поездки. В номере: большая кровать king-size, рабочая зона, мини-бар, сейф.',
-    price: 8500,
-    rating: 4.7,
-    maxGuests: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3',
-    amenities: [
-        'Кондиционер',
-        'Wi-Fi',
-        'Телевизор',
-        'Мини-бар',
-        'Сейф',
-        'Фен',
-        'Кофеварка',
-        'Балкон',
-        'Вид на море',
-        'Джакузи'
-    ]
-})
-
 const disabledDates = ref(null)
 const currentPrice = ref(null)
 const roomId = route().params.room
@@ -258,7 +241,7 @@ const roomCur = ref({})
 const isProcessing = ref(false)
 const errors = ref({})
 
-// Загрузка данных для редактирования
+// Загрузка данных номера
 const loadRoomData = async () => {
     try {
         const {data} = await axios.get(route('rooms.show', roomId))
@@ -443,6 +426,28 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+.previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 10px 5px 5px 0;
+}
+
+.gallery-item {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
 .container {
     max-width: 1200px;

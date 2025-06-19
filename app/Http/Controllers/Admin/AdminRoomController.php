@@ -7,6 +7,7 @@ use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
 use App\Models\Room;
+use App\Models\RoomImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -86,7 +87,7 @@ class AdminRoomController extends Controller
 
     public function deletePhoto(Room $room): JsonResponse
     {
-        $room->delete();
+        $room->room_image = null;
         return response()->json(null, 204);
     }
 
@@ -104,5 +105,31 @@ class AdminRoomController extends Controller
         return response()->json([
             'message' => 'Файл добавлен'
         ],204);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function uploadGalleryFiles(Request $request, Room $room): JsonResponse
+    {
+        $gallery = $request->file('gallery');
+
+        foreach ($gallery as $item) {
+            $imgPath = Storage::disk('public')->put('/images', $item);
+            RoomImage::query()->create([
+                'room_id' => $room->id,
+                'filename' => $imgPath,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Файл добавлен'
+        ],204);
+    }
+
+    public function deleteGalleryPhoto(RoomImage $image): JsonResponse
+    {
+        $image->delete();
+        return response()->json(null, 204);
     }
 }

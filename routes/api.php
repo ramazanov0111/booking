@@ -28,6 +28,9 @@ Route::prefix('proger')->group(function (){
     Route::post('upload_file/{room}', [AdminRoomController::class, 'uploadFile'])->name('room.upload_file');
     Route::delete('rooms/photo/{room}', [AdminRoomController::class, 'deletePhoto'])->name('rooms_photo.destroy');
 
+    Route::post('upload_gallery/{room}', [AdminRoomController::class, 'uploadGalleryFiles'])->name('room.upload_gallery');
+    Route::delete('rooms/gallery/{image}', [AdminRoomController::class, 'deleteGalleryPhoto'])->name('rooms_gallery.destroy');
+
 })->middleware('auth:sanctum');
 
 

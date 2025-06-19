@@ -21,7 +21,8 @@
                 </div>
 
                 <!-- Форма -->
-                <form @submit.prevent="handleSubmit" class="bg-white p-6 rounded-lg shadow-md" enctype="multipart/form-data">
+                <form @submit.prevent="handleSubmit" class="bg-white p-6 rounded-lg shadow-md"
+                      enctype="multipart/form-data">
                     <!-- Название -->
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2">Название номера</label>
@@ -96,7 +97,10 @@
                         <!-- Изображение -->
                         <div>
                             <label class="block text-gray-700 mb-2">Текущее изображение</label>
-                            <img :src="form.imageUrl" alt="Текущее изображение">
+                            <div class="preview-item">
+                                <img :src="form.imageUrl" alt="Текущее изображение" class="preview-image">
+                                <button @click.prevent="deletePreview" class="remove-btn">×</button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-gray-700 mb-2">Новое изображение</label>
@@ -105,9 +109,35 @@
                                 class="w-full p-2 border rounded-lg"
                                 @change="uploadFile"
                             >
-                            <img :src="previewImage" v-if="previewImage" alt="Новое изображение">
+                            <div v-if="previewImage" class="preview-item">
+                                <img :src="previewImage" alt="Новое изображение" class="preview-image">
+                            </div>
                         </div>
+                    </div>
 
+                    <!-- Галерея -->
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2">Галерея</label>
+                        <div v-if="form.gallery.length" class="previews grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <div v-for="item in form.gallery" :key="index" class="gallery-item">
+                                <img :src="item.imageUrl" :alt="item.imageUrl" class="preview-image">
+                                <button @click.prevent="deleteImage(form.id)" class="remove-btn">×</button>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <input
+                                type="file"
+                                class="p-2 border rounded-lg"
+                                @change="uploadGallery"
+                                multiple
+                            >
+                        </div>
+                        <div v-if="previewUrls.length" class="previews grid grid-cols-1 md:grid-cols-5 gap-2">
+                            <div v-for="(image, index) in previewUrls" :key="index" class="gallery-item">
+                                <img :src="image" alt="Preview" class="preview-image">
+                                <button @click.prevent="removeImage(index)" class="remove-btn">×</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Удобства -->
@@ -192,16 +222,6 @@
                                 >
                                     <i class="fas fa-trash"></i>
                                 </button>
-
-                                <!--                                <Link :href="route('rooms.edit', room)" class="text-blue-600 hover:text-blue-900">-->
-                                <!--                                    <i class="fas fa-edit"></i>-->
-                                <!--                                </Link>-->
-                                <!--                                <button-->
-                                <!--                                    @click="deleteRoom(room.id)"-->
-                                <!--                                    class="text-red-600 hover:text-red-900"-->
-                                <!--                                >-->
-                                <!--                                    <i class="fas fa-trash"></i>-->
-                                <!--                                </button>-->
                             </td>
                         </tr>
                         </tbody>
@@ -225,14 +245,11 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue'
+import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
 import {useRouter} from 'vue-router'
 import AppLayout from "@/Layouts/AppLayout.vue";
 import {Link, useForm} from "@inertiajs/vue3";
 import {route} from "ziggy-js";
-import InputLabel from "../../Components/InputLabel.vue";
-import InputError from "../../Components/InputError.vue";
-import SecondaryButton from "../../Components/SecondaryButton.vue";
 
 const router = useRouter()
 
@@ -248,7 +265,8 @@ const form = ref({
     base_price: 0,
     is_available: true,
     amenities: [],
-    imageUrl: ''
+    imageUrl: '',
+    gallery: [],
 })
 
 // Список доступных удобств
@@ -266,6 +284,8 @@ const amenitiesList = ref([
 
 const previewImage = ref('');
 const file = ref(null);
+const galleryFiles = ref([]);
+const previewUrls = ref([]);
 
 // Ошибки валидации
 const errors = ref({
@@ -278,6 +298,67 @@ const errors = ref({
 const room = route().params.room
 const prices = ref([])
 
+const uploadFile = async (e) => {
+    if (e.target.files) {
+        file.value = e.target.files[0];
+        previewImage.value = URL.createObjectURL(file.value);
+    }
+}
+
+const uploadGallery = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+
+    galleryFiles.value = Array.from(files);
+    generatePreviews();
+}
+
+const generatePreviews = () => {
+    // Очищаем предыдущие превью
+    previewUrls.value.forEach(url => URL.revokeObjectURL(url));
+    previewUrls.value = [];
+
+    // Создаем новые превью
+    galleryFiles.value.forEach(file => {
+        const url = URL.createObjectURL(file);
+        previewUrls.value.push(url);
+    });
+}
+
+const removeImage = async (index) => {
+    // Освобождаем ресурсы превью
+    URL.revokeObjectURL(previewUrls.value[index]);
+
+    // Удаляем из массивов
+    previewUrls.value.splice(index, 1);
+    galleryFiles.value.splice(index, 1);
+
+    // Обновляем input (для возможности повторного выбора тех же файлов)
+    // this.$refs.fileInput.value = '';
+}
+
+// Удаление основного изображения
+const deletePreview = async () => {
+    if (!confirm('Удалить главное изображение?')) return
+    try {
+        await axios.delete(route('rooms_photo.destroy', room))
+        await loadRoomData()
+    } catch (error) {
+        console.error('Ошибка удаления:', error)
+    }
+}
+
+// Удаление изображения из галереи
+const deleteImage = async (image) => {
+    if (!confirm('Удалить это изображение?')) return
+    try {
+        await axios.delete(route('rooms_gallery.destroy', image))
+        await loadRoomData()
+    } catch (error) {
+        console.error('Ошибка удаления:', error)
+    }
+}
+
 // Загрузка данных для редактирования
 const loadRoomData = async () => {
     try {
@@ -285,7 +366,8 @@ const loadRoomData = async () => {
 
         form.value = {
             ...data.data,
-            amenities: data.data.amenities || []
+            amenities: data.data.amenities || [],
+            gallery: data.data.gallery
         }
 
         prices.value = data.data.prices || [];
@@ -338,22 +420,14 @@ const deletePrice = async (price) => {
     }
 }
 
-const uploadFile = async (e) => {
-    if (e.target.files) {
-        file.value = e.target.files[0];
-
-        previewImage.value = URL.createObjectURL(file.value);
-    }
-}
-
 // Отправка формы
-const handleSubmit = async (e) => {
+const handleSubmit = async () => {
     if (!validateForm()) return
 
     loading.value = true
     const payload = {
         ...form.value,
-        amenities: form.value.amenities
+        amenities: form.value.amenities,
     }
 
     try {
@@ -365,16 +439,28 @@ const handleSubmit = async (e) => {
         }
 
         const roomId = isEditMode.value ? room : savedRoomId.value;
-        const formData = new FormData();
+        const formData1 = new FormData();
+        const formData2 = new FormData();
 
-        formData.append('room_image', file.value); // Ключ должен совпадать с именем в Laravel
+        formData1.append('room_image', file.value); // Ключ должен совпадать с именем в Laravel
+
+        galleryFiles.value.forEach(galleryFile => {
+            formData2.append('gallery[]', galleryFile);
+        });
 
         try {
-            const response = await axios.post(route('room.upload_file', roomId), formData);
-            console.log('Успех:', response.data);
+            const response1 = file.value ? await axios.post(route('room.upload_file', roomId), formData1) : '';
+            const response2 = galleryFiles.value.length ? await axios.post(route('room.upload_gallery', roomId), formData2) : '';
+            console.log('Успех:', [response1.data, response2.data]);
         } catch (error) {
             console.error('Ошибка:', error.response);
         }
+
+        // Очищаем после успешной отправки
+        previewUrls.value.forEach(url => URL.revokeObjectURL(url));
+        previewUrls.value = [];
+        galleryFiles.value = [];
+        // this.$refs.fileInput.value = '';
 
         window.location.href = route('rooms.list');
     } catch (error) {
@@ -394,9 +480,65 @@ onMounted(() => {
         loadRoomData()
     }
 })
+
+// Очищаем ресурсы при уничтожении компонента
+onBeforeUnmount(() => {
+    previewUrls.value.forEach(url => URL.revokeObjectURL(url));
+})
+
 </script>
 
 <style scoped>
+
+.preview-item {
+    position: relative;
+    width: 175px;
+    height: 175px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.gallery-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.gallery {
+    width: 200px;
+    height: 150px;
+}
+
 .form-checkbox {
     border-radius: 0.25rem;
     border: 1px solid #d1d5db;

@@ -12,6 +12,7 @@ class RoomResource extends JsonResource
         $rating = 0;
         $reviews = $this->reviews;
         $reviewsCnt = count($reviews);
+        $gallery = ImageResource::collection($this->gallery);
 
         if ($reviewsCnt) {
             $sum = 0;
@@ -35,7 +36,8 @@ class RoomResource extends JsonResource
             'updated_at' => $this->updated_at->format('d-m-Y H:i'),
             'prices' => $this->prices,
             'rating' => $rating,
-            'reviewsCnt' => $reviewsCnt
+            'reviewsCnt' => $reviewsCnt,
+            'gallery' => $gallery,
         ];
     }
 }
