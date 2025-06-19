@@ -21,7 +21,7 @@
                                         v-model="filters.checkIn"
                                         :enable-time-picker="false"
                                         placeholder="Выберите период"
-                                        format="yyy-MM-dd"
+                                        format="dd-MM-yyy"
                                         auto-apply
                                     />
                                 </div>
@@ -31,7 +31,7 @@
                                         v-model="filters.checkOut"
                                         :enable-time-picker="false"
                                         placeholder="Выберите период"
-                                        format="yyy-MM-dd"
+                                        format="dd-MM-yyy"
                                         auto-apply
                                     />
                                 </div>
@@ -88,30 +88,28 @@
                     {{ error }}
                 </div>
 
-                <div
-                    v-for="room in filteredRooms"
-                    :key="room.id"
-                    class="room-card"
-                >
-                    <div class="room-image">
-                        <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
-                        <div class="price-badge">{{ formatPrice(room.base_price) }} / ночь</div>
-                    </div>
+                <div class="room-card" v-for="room in filteredRooms"
+                     :key="room.id">
+                    <!-- Основной контент карточки -->
+                    <div class="room-card-content">
+                        <Link :href="route('room.show', room.id)" class="grid">
+                            <div class="room-image">
+                                <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
+                                <div class="price-badge">{{ formatPrice(room.base_price) }} / ночь</div>
+                            </div>
 
-                    <div class="room-content">
-                        <h3>
-                            <Link :href="route('room.show', room.id)" class="flex items-center space-x-2">
-                                {{ room.name }}
-                            </Link>
-                        </h3>
-                        <div class="rating">
-                            <span class="stars">{{ renderStars(room.rating) }}</span>
-                            <span class="reviews">
+                            <div class="room-content">
+                                <h3>
+                                    {{ room.name }}
+                                </h3>
+                                <div class="rating">
+                                    <span class="stars">{{ renderStars(room.rating) }}</span>
+                                    <span class="reviews">
                                 ({{ room.reviewsCnt }} {{ pluralize(room.reviewsCnt, ['отзыв', 'отзыв', 'отзывов']) }})
                             </span>
-                        </div>
+                                </div>
 
-                        <div class="amenities">
+                                <div class="amenities">
                             <span
                                 v-for="amenity in room.amenities"
                                 :key="amenity"
@@ -119,13 +117,14 @@
                             >
                               {{ amenity }}
                             </span>
-                        </div>
+                                </div>
 
-                        <button
-                            class="book-button"
-                            id="book-button"
-                            @click="openModal(room, $page.props.auth.user)"
-                        >
+                            </div>
+                        </Link>
+                    </div>
+                    <!-- Кнопка бронирования -->
+                    <div class="book-button">
+                        <button @click="openModal(room, $page.props.auth.user)">
                             Забронировать
                         </button>
                     </div>
@@ -283,9 +282,11 @@ watch([filters, sortBy, currentPage], () => {
 
 // Инициализация
 loadRooms()
+
 </script>
 
 <style scoped>
+
 .catalog-page {
     max-width: 1200px;
     margin: 0 auto;
@@ -317,11 +318,43 @@ loadRooms()
 }
 
 .room-card {
+    position: relative;
+    display: flex;           /* Включаем flex-контейнер */
+    flex-direction: column;  /* Элементы в колонку */
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    transition: transform 0.3s;
+    justify-items: center;
+    height: 470px;           /* Фиксированная высота */
+}
+
+.room-card-content {
+    flex: 1; /* Занимает все доступное пространство */
+    display: flex;
+    flex-direction: column;
+}
+
+.book-button {
+    margin: 0 15px 15px; /* Отступы: сверху 0, по бокам 15px, снизу 15px */
+    padding: 0;
+    width: calc(100% - 30px); /* Ширина с учетом отступов */
+}
+
+.book-button button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.book-button button:hover {
+    background: #1976d2;
 }
 
 .room-card:hover {
@@ -350,7 +383,7 @@ loadRooms()
 }
 
 .room-content {
-    padding: 1.5rem;
+    padding: 0.8rem;
 }
 
 .rating {
@@ -365,7 +398,7 @@ loadRooms()
 }
 
 .amenities {
-    margin: 1rem 0;
+    margin: 1rem 0 0;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -373,24 +406,9 @@ loadRooms()
 
 .amenity-tag {
     background: #f0f4ff;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.4rem;
     border-radius: 4px;
-    font-size: 0.9em;
-}
-
-.book-button {
-    width: 100%;
-    padding: 0.75rem;
-    background: #2196f3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.book-button:hover {
-    background: #1976d2;
+    font-size: 0.8em;
 }
 
 .pagination {
