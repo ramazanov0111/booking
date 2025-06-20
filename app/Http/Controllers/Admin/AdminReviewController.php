@@ -7,6 +7,7 @@ use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Http\Resources\ReviewResource;
 use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,8 +22,11 @@ class AdminReviewController extends Controller
     {
         $userId = $request->get('userId');
         $roomId = $request->get('roomId');
-        $startDate = $request->get('startDate');
-        $endDate = $request->get('endDate');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $startDate = $startDate ? Carbon::parse($startDate) : null;
+        $endDate = $endDate ? Carbon::parse($endDate) : null;
 
         $reviews = Review::with(['room', 'user'])
             ->when(!is_null($userId), fn($q) => $q->where('user_id', $userId))

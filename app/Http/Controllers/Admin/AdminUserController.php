@@ -29,6 +29,9 @@ class AdminUserController extends Controller
             'meta' => [
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),
+                'from' => $users->firstItem(),
+                'to' => $users->lastItem(),
+                'current_page' => $users->currentPage()
             ]
         ]);
     }

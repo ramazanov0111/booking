@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
 use App\Models\Room;
 use App\Models\RoomImage;
+use Carbon\Carbon;
+use DateInterval;
+use DatePeriod;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -27,10 +30,10 @@ class AdminRoomController extends Controller
         $status = $request->get('status');
 
         $rooms = Room::query()
-            ->when(!is_null($name), fn($q) => $q->where('name', 'like', '%'.$name.'%'))
+            ->when(!is_null($name), fn($q) => $q->where('name', 'like', '%' . $name . '%'))
             ->when(!is_null($capacity), fn($q) => $q->where('capacity', (int)$capacity))
             ->when(!is_null($status), fn($q) => $q->where('is_available', (bool)$status))
-            ->when($minBasePrice && $maxBasePrice, fn ($q) => $q->whereBetween('base_price', [$minBasePrice, $maxBasePrice]))
+            ->when($minBasePrice && $maxBasePrice, fn($q) => $q->whereBetween('base_price', [$minBasePrice, $maxBasePrice]))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -39,6 +42,9 @@ class AdminRoomController extends Controller
             'meta' => [
                 'total' => $rooms->total(),
                 'per_page' => $rooms->perPage(),
+                'from' => $rooms->firstItem(),
+                'to' => $rooms->lastItem(),
+                'current_page' => $rooms->currentPage(),
             ]
         ]);
     }
@@ -114,7 +120,7 @@ class AdminRoomController extends Controller
 
         return response()->json([
             'message' => 'Файл добавлен'
-        ],204);
+        ], 204);
     }
 
     /**
@@ -134,12 +140,73 @@ class AdminRoomController extends Controller
 
         return response()->json([
             'message' => 'Файл добавлен'
-        ],204);
+        ], 204);
     }
 
     public function deleteGalleryPhoto(RoomImage $image): JsonResponse
     {
         $image->delete();
         return response()->json(null, 204);
+    }
+
+    public function enabledRooms(Request $request): JsonResponse
+    {
+        $startDate = Carbon::parse($request->get('start_date'));
+        $endDate = Carbon::parse($request->get('end_date'));
+
+        $rooms = Room::query()
+            ->where('is_available', 1)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        $data = [];
+        foreach ($rooms->all() as $room) {
+            $isEnabled = true;
+            $newPrice = 0;
+            foreach ($room->bookings->all() as $booking) {
+                if ($startDate->isBetween($booking->check_in, $booking->check_out)
+                    || $endDate->isBetween($booking->check_in, $booking->check_out)) {
+                    $isEnabled = false;
+                }
+            }
+
+            if ($isEnabled) {
+                // получение цены за период из фильтра
+                foreach ($room->prices->all() as $price) {
+                    if ($startDate->isBetween($price->start_date, $price->end_date)
+                        || $endDate->isBetween($price->start_date, $price->end_date)) {
+                        $newPrice = $price;
+                        break;
+                    }
+                }
+
+                $dates = array();
+                $period = new DatePeriod(
+                    $startDate,
+                    new DateInterval('P1D'),
+                    $endDate
+                );
+
+                foreach ($period as $key => $value) {
+                    $dates[] = Carbon::parse($value);
+                }
+
+                $data[] = [
+                    'room' => $room,
+                    'price' => $newPrice,
+                    'firstDate' => $dates[0],
+                ];
+            }
+        }
+
+        return response()->json([
+            'data' => RoomResource::collection($data),
+            'meta' => [
+                'total' => $rooms->total(),
+                'per_page' => $rooms->perPage(),
+                'from' => $rooms->firstItem(),
+                'to' => $rooms->lastItem()
+            ]
+        ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\StorePriceRequest;
 use App\Http\Requests\UpdatePriceRequest;
 use App\Http\Resources\PriceResource;
 use App\Models\Price;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,11 +24,14 @@ class AdminPriceController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
+        $startDate = $startDate ? Carbon::parse($startDate) : null;
+        $endDate = $endDate ? Carbon::parse($endDate) : null;
+
         $prices = Price::with('room')
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
-                    ->whereBetween('end_date', [$startDate, $endDate]);
+                    ->orWhereBetween('end_date', [$startDate, $endDate]);
             })
             ->orderBy('start_date', 'desc')
             ->paginate(25);

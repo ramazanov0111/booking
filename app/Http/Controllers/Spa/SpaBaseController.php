@@ -26,10 +26,14 @@ class SpaBaseController extends Controller
     public function roomList(Request $request): JsonResponse
     {
         $capacity = $request->get('guests');
-        $checkIn = $request->get('checkIn');
-        $checkOut = $request->get('checkOut');
+        $checkIn = $request->get('checkIn') ?? null;
+        $checkOut = $request->get('checkOut') ?? null;
+        $amenities = $request->get('amenities', []);
 
-        $rooms = Room::query()
+        $checkIn = $checkIn ? Carbon::parse($checkIn) : null;
+        $checkOut = $checkOut ? Carbon::parse($checkOut) : null;
+
+        $rooms = Room::with('prices')
             ->where('is_available', true)
             ->when(!is_null($capacity), fn($q) => $q->where('capacity', '>=', $capacity))
 //            ->when($checkIn && $checkOut, function ($q) use ($checkIn, $checkOut) {
@@ -39,8 +43,37 @@ class SpaBaseController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
+        $data = [];
+        foreach ($rooms->all() as $room) {
+            // проверка наличия удобств
+            $issetAmenities = !count($amenities);
+            $roomAmenities = json_decode($room->amenities);
+            foreach ($amenities as $amenity) {
+                $issetAmenities = in_array($amenity, $roomAmenities);
+            }
+
+            $newPrice = 0;
+            if ($checkIn && $checkOut) {
+                // получение цены за период из фильтра
+                foreach ($room->prices->all() as $price) {
+                    if ($checkIn->isBetween($price->start_date, $price->end_date)
+                        && $checkOut->isBetween($price->start_date, $price->end_date)) {
+                        $newPrice = $price;
+                        break;
+                    }
+                }
+            }
+
+            if ($issetAmenities) {
+                $data[] = [
+                    'room' => $room,
+                    'price' => $newPrice
+                ];
+            }
+        }
+
         return response()->json([
-            'data' => RoomResource::collection($rooms),
+            'data' => RoomResource::collection($data),
             'meta' => [
                 'total' => $rooms->total(),
                 'per_page' => $rooms->perPage(),
@@ -84,7 +117,7 @@ class SpaBaseController extends Controller
             );
 
             foreach ($period as $key => $value) {
-                $dates[] = $value->format('d-m-Y');
+                $dates[] = Carbon::parse($value);
             }
         }
 
@@ -95,6 +128,7 @@ class SpaBaseController extends Controller
     {
         $bookingDates = Booking::query()
             ->where('room_id', $roomId)
+            ->whereNot('status', 'canceled')
             ->orderBy('check_in', 'desc')
             ->get()
             ->all();
@@ -109,7 +143,7 @@ class SpaBaseController extends Controller
             );
 
             foreach ($period as $key => $value) {
-                $dates[] = $value->format('d-m-Y');
+                $dates[] = Carbon::parse($value);
             }
         }
 

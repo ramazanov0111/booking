@@ -7,6 +7,7 @@ use App\Http\Requests\StoreBlockedDateRequest;
 use App\Http\Requests\UpdateBlockedDateRequest;
 use App\Http\Resources\BlockedDateResource;
 use App\Models\BlockedDate;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,11 +23,14 @@ class AdminBlockedDateController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
+        $startDate = $startDate ? Carbon::parse($startDate) : null;
+        $endDate = $endDate ? Carbon::parse($endDate) : null;
+
         $blockedDates = BlockedDate::with('room')
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('date_start', [$startDate, $endDate])
-                    ->whereBetween('date_end', [$startDate, $endDate]);
+                    ->orWhereBetween('date_end', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(25);

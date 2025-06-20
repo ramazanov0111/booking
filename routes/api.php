@@ -23,6 +23,8 @@ Route::prefix('proger')->group(function (){
 
     Route::get('actual_price', [AdminPriceController::class, 'actualPrice']);
 
+    Route::get('enabled_rooms', [AdminRoomController::class, 'enabledRooms'])->name('rooms.enabled');
+
     Route::patch('review/publish/{review}', [AdminReviewController::class, 'publish'])->name('review.publish');
 
     Route::post('upload_file/{room}', [AdminRoomController::class, 'uploadFile'])->name('room.upload_file');

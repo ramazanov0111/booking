@@ -83,7 +83,7 @@
                             </div>
                             <div class="flex space-x-2">
                                 <button
-                                    v-for="page in meta.last_page"
+                                    v-for="page in meta.to"
                                     :key="page"
                                     @click="changePage(page)"
                                     :class="page === meta.current_page ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"

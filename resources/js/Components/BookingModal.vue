@@ -22,7 +22,7 @@
                         v-model="checkInDate"
                         :disabled-dates="disabledDates"
                         :enable-time-picker="false"
-                        format="yyy-MM-dd"
+                        format="dd-MM-yyy"
                         auto-apply
                         @on-change="loadPrice"
                     />
@@ -34,7 +34,7 @@
                         v-model="checkOutDate"
                         :disabled-dates="disabledDates"
                         :enable-time-picker="false"
-                        format="yyy-MM-dd"
+                        format="dd-MM-yyy"
                         auto-apply
                         @on-change="loadPrice"
                     />
@@ -91,7 +91,6 @@
 
 <script setup>
 import {ref, computed, watch, onMounted} from 'vue'
-import {useBookingStore} from '@/store/booking'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import Modal from "@/Components/Modal.vue";
@@ -182,14 +181,16 @@ const loadPrice = async () => {
 }
 
 const getDisabledDatesForRoom = async () =>  {
-    try {
-        const response1 = await axios.get(route('blocked_dates.by_room', props.room?.id))
-        const response2 = await axios.get(route('bookings.by_room', props.room?.id))
+    if (props.show) {
+        try {
+            const response1 = await axios.get(route('blocked_dates.by_room', props.room?.id))
+            const response2 = await axios.get(route('bookings.by_room', props.room?.id))
 
-        disabledDates.value = [...response1.data, ...response2.data]
+            disabledDates.value = [...response1.data, ...response2.data]
 
-    } catch (error) {
-        console.error('Ошибка загрузки дат:', error)
+        } catch (error) {
+            console.error('Ошибка загрузки дат:', error)
+        }
     }
 }
 

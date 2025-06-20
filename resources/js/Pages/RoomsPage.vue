@@ -6,31 +6,33 @@
                     <h2 class="text-2xl font-bold text-gray-800">Найти идеальный номер</h2>
                     <p class="text-gray-500">Отфильтруйте варианты по вашим предпочтениям</p>
                 </div>
-                <!-- Фильтры и сортировка -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Фильтры -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                     <!-- Фильтр по датам -->
                     <div class="relative">
-                        <div class="absolute -top-3 left-4 bg-white px-2 text-indigo-600 font-medium">Даты проживания
-                        </div>
+                        <div class="absolute -top-3 left-4 bg-white px-2 text-black-600 font-medium">Дата заезда</div>
                         <div class="border border-gray-200 rounded-xl p-5 pt-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 mt-4 text-sm text-gray-600">
-                                <div class="date-range-picker">
-                                    <label class="block text-sm font-medium text-gray-600 mb-1">Заезд</label>
+                            <div class="flex justify-between items-center">
+                                <div class="date-range-picker mr-3">
                                     <VueDatePicker
                                         v-model="filters.checkIn"
                                         :enable-time-picker="false"
-                                        placeholder="Выберите период"
                                         format="dd-MM-yyy"
                                         auto-apply
                                     />
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -top-3 left-4 bg-white px-2 text-black-600 font-medium">Дата выезда</div>
+                        <div class="border border-gray-200 rounded-xl p-5 pt-6">
+                            <div class="flex justify-between items-center">
                                 <div class="date-range-picker">
-                                    <label class="block text-sm font-medium text-gray-600 mb-1">Выезд</label>
                                     <VueDatePicker
                                         v-model="filters.checkOut"
                                         :enable-time-picker="false"
-                                        placeholder="Выберите период"
                                         format="dd-MM-yyy"
                                         auto-apply
                                     />
@@ -38,42 +40,69 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- Фильтр по гостям -->
                     <div class="relative">
-                        <div class="absolute -top-3 left-4 bg-white px-2 text-indigo-600 font-medium">Гости</div>
+                        <div class="absolute -top-3 left-4 bg-white px-2 text-black-600 font-medium">Гости</div>
                         <div class="border border-gray-200 rounded-xl p-5 pt-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="flex items-center space-x-3">
-                                    <button
-                                        class="counter-btn"
-                                        :class="{ 'opacity-50 cursor-not-allowed': filters.guests <= guestsParams.min }"
-                                        :disabled="filters.guests <= guestsParams.min"
-                                        @click="decrement"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                  d="M20 12H4"></path>
-                                        </svg>
-                                    </button>
-
-                                    <span class="counter-value">{{ filters.guests }}</span>
-
-                                    <button
-                                        class="counter-btn"
-                                        :class="{ 'opacity-50 cursor-not-allowed': filters.guests >= guestsParams.max }"
-                                        :disabled="filters.guests >= guestsParams.max"
-                                        @click="increment"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                  d="M20 12H4"></path>
-                                        </svg>
-                                    </button>
-                                </div>
+                            <div class="flex justify-between items-center">
+                                <button
+                                    class="counter-btn"
+                                    :class="{ 'opacity-50 cursor-not-allowed': filters.guests <= guestsParams.min }"
+                                    :disabled="filters.guests <= guestsParams.min"
+                                    @click="decrement"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <span class="counter-value">{{ filters.guests }}</span>
+                                <button
+                                    class="counter-btn"
+                                    :class="{ 'opacity-50 cursor-not-allowed': filters.guests >= guestsParams.max }"
+                                    :disabled="filters.guests >= guestsParams.max"
+                                    @click="increment"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                              d="M20 12H4"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
 
+                    <div class="relative filter-button">
+                        <button @click.prevent="loadRooms"
+                                class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                            Фильтровать
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Фильтр по удобствам -->
+                <div class="relative mt-5 amenities-filter">
+                    <div class="absolute -top-3 left-4 bg-white px-2 text-black-600 font-medium">Удобства</div>
+                    <div class="border border-gray-200 rounded-xl p-2 pt-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <label
+                                    v-for="amenity in amenitiesList"
+                                    :key="amenity"
+                                    class="flex items-center space-x-2 rounded-lg hover:bg-gray-50 amenities-filter-item"
+                                >
+                                    <input
+                                        v-model="filters.amenities"
+                                        type="checkbox"
+                                        :value="amenity"
+                                        class="form-checkbox h-5 w-5 text-blue-600"
+                                    >
+                                    <span class="text-gray-700">{{ amenity }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -95,7 +124,8 @@
                         <Link :href="route('room.show', room.id)" class="grid">
                             <div class="room-image">
                                 <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
-                                <div class="price-badge">{{ formatPrice(room.base_price) }} / ночь</div>
+                                <div class="price-badge" :class="{ 'strikethrough': room.price.price > 0 }">{{ formatPrice(room.base_price) }} / ночь</div>
+                                <div class="new-price" v-if="room.price.price > 0">{{ formatPrice(room.price.price) }} / ночь</div>
                             </div>
 
                             <div class="room-content">
@@ -105,18 +135,20 @@
                                 <div class="rating">
                                     <span class="stars">{{ renderStars(room.rating) }}</span>
                                     <span class="reviews">
-                                ({{ room.reviewsCnt }} {{ pluralize(room.reviewsCnt, ['отзыв', 'отзыв', 'отзывов']) }})
-                            </span>
+                                        ({{
+                                            room.reviewsCnt
+                                        }} {{ pluralize(room.reviewsCnt, ['отзыв', 'отзыв', 'отзывов']) }})
+                                    </span>
                                 </div>
 
                                 <div class="amenities">
-                            <span
-                                v-for="amenity in room.amenities"
-                                :key="amenity"
-                                class="amenity-tag"
-                            >
-                              {{ amenity }}
-                            </span>
+                                    <span
+                                        v-for="amenity in room.amenities"
+                                        :key="amenity"
+                                        class="amenity-tag"
+                                    >
+                                      {{ amenity }}
+                                    </span>
                                 </div>
 
                             </div>
@@ -131,23 +163,10 @@
                 </div>
             </div>
 
-            <!-- Пагинация -->
-            <div class="pagination">
-                <button
-                    v-for="page in totalPages"
-                    :key="page"
-                    :class="{ active: currentPage === page }"
-                    @click="changePage(page)"
-                >
-                    {{ page }}
-                </button>
-            </div>
-
             <!-- Модальное окно бронирования -->
             <BookingModal
                 :show="selectedRoom"
                 :room="selectedRoom"
-                :disabledDates="disabledDates"
                 :user="$page.props.auth.user"
 
                 @close="selectedRoom = null"
@@ -195,20 +214,9 @@ const guestsParams = ref({
 const filters = ref({
     checkIn: null,
     checkOut: null,
-    guests: 2,
+    guests: 1,
     amenities: []
 })
-
-const sortBy = ref('price_asc')
-const currentPage = ref(1)
-const totalPages = ref(1)
-
-// Конфигурация календаря
-const dateConfig = {
-    mode: 'range',
-    dateFormat: 'd-m-Y',
-    locale: Russian
-}
 
 const increment = async () => {
     if (filters.value.guests < guestsParams.value.max) {
@@ -228,19 +236,15 @@ const loadRooms = async () => {
         error.value = null
 
         const params = {
-            page: currentPage.value,
             guests: filters.value.guests,
             amenities: filters.value.amenities,
-            sort: sortBy.value,
             checkIn: filters.value.checkIn,
             checkOut: filters.value.checkOut,
         }
 
         const response = await axios.get(route('api.rooms.list'), {params})
 
-
         filteredRooms.value = response.data.data
-        totalPages.value = response.data.meta.last_page
     } catch (e) {
         error.value = 'Не удалось загрузить номера. Попробуйте позже.'
     } finally {
@@ -276,9 +280,9 @@ const openModal = (room, user) => {
 }
 
 // Следим за изменениями фильтров
-watch([filters, sortBy, currentPage], () => {
-    loadRooms()
-}, {deep: true})
+// watch([filters], () => {
+//     loadRooms()
+// }, {deep: true})
 
 // Инициализация
 loadRooms()
@@ -286,6 +290,10 @@ loadRooms()
 </script>
 
 <style scoped>
+
+.strikethrough {
+    text-decoration: line-through;
+}
 
 .catalog-page {
     max-width: 1200px;
@@ -304,10 +312,44 @@ loadRooms()
     margin-bottom: 1.5rem;
 }
 
+.filter-button {
+    display: flex;
+    justify-content: right;
+    align-items: end;
+}
+
+.amenities-filter {
+    margin: 1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex: 1; /* Занимает все доступное пространство */
+    flex-direction: column;
+}
+.amenities-filter-item {
+    padding: 0.3rem 0.5rem;
+    font-size: 1.1em;
+}
+
+.amenities {
+    margin: 1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.amenity-tag {
+    background: #f0f4ff;
+    padding: 0.25rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
 .amenities-checkboxes {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+
 }
 
 .room-list {
@@ -319,15 +361,15 @@ loadRooms()
 
 .room-card {
     position: relative;
-    display: flex;           /* Включаем flex-контейнер */
-    flex-direction: column;  /* Элементы в колонку */
+    display: flex; /* Включаем flex-контейнер */
+    flex-direction: column; /* Элементы в колонку */
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s;
     justify-items: center;
-    height: 470px;           /* Фиксированная высота */
+    height: 470px; /* Фиксированная высота */
 }
 
 .room-card-content {
@@ -375,7 +417,17 @@ loadRooms()
 .price-badge {
     position: absolute;
     bottom: 1rem;
-    left: 1rem;
+    left: 2rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.new-price {
+    position: absolute;
+    bottom: 1rem;
+    right: 2rem;
     background: rgba(0, 0, 0, 0.7);
     color: white;
     padding: 0.5rem 1rem;
@@ -395,20 +447,6 @@ loadRooms()
 
 .stars {
     color: #ffd700;
-}
-
-.amenities {
-    margin: 1rem 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.amenity-tag {
-    background: #f0f4ff;
-    padding: 0.25rem 0.4rem;
-    border-radius: 4px;
-    font-size: 0.8em;
 }
 
 .pagination {
@@ -468,5 +506,14 @@ loadRooms()
 .counter-icon {
     width: 16px;
     height: 16px;
+}
+
+.form-checkbox {
+    border-radius: 0.25rem;
+    border: 1px solid #d1d5db;
+}
+
+.form-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
 }
 </style>

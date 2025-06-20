@@ -93,7 +93,6 @@
                                 <span class="text-gray-700">Доступен для бронирования</span>
                             </label>
                         </div>
-å
                         <!-- Изображение -->
                         <div v-if="form.imageUrl">
                             <label class="block text-gray-700 mb-2">Текущее изображение</label>
@@ -265,7 +264,7 @@ const form = ref({
     base_price: 0,
     is_available: true,
     amenities: [],
-    imageUrl: '',
+    imageUrl: null,
     gallery: [],
 })
 

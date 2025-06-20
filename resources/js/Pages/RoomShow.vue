@@ -169,7 +169,7 @@
                                         v-model="checkIn"
                                         :disabled-dates="disabledDates"
                                         :enable-time-picker="false"
-                                        format="yyy-MM-dd"
+                                        format="dd-MM-yyy"
                                         auto-apply
                                         @on-change="loadPrice"
                                     />
@@ -180,7 +180,7 @@
                                         v-model="checkOut"
                                         :disabled-dates="disabledDates"
                                         :enable-time-picker="false"
-                                        format="yyy-MM-dd"
+                                        format="dd-MM-yyy"
                                         auto-apply
                                         @on-change="loadPrice"
                                     />
@@ -253,9 +253,9 @@ const loadRoomData = async () => {
 }
 
 // Состояния бронирования
-const paymentMethod = ref(null)
-const checkIn = ref(new Date())
-const checkOut = ref(new Date(Date.now() + 86400000 * 3))
+const paymentMethod = ref([])
+const checkIn = ref(null)
+const checkOut = ref(null)
 const paymentMethods = [
     { key: 'online', value: 'Онлайн' },
     { key: 'on_site', value: 'На месте' }
@@ -323,7 +323,6 @@ const getDisabledDatesForRoom = async () =>  {
         const response2 = await axios.get(route('bookings.by_room', roomId))
 
         disabledDates.value = [...response1.data, ...response2.data]
-
     } catch (error) {
         console.error('Ошибка загрузки дат:', error)
     }

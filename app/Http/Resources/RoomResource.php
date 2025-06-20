@@ -9,10 +9,12 @@ class RoomResource extends JsonResource
 {
     public function toArray($request): array
     {
+        $firstDate =  $this['firstDate'] ?? null;
+        $room = $this['room'] ?? $this;
         $rating = 0;
-        $reviews = $this->reviews;
+        $reviews = $room->reviews;
         $reviewsCnt = count($reviews);
-        $gallery = ImageResource::collection($this->gallery);
+        $gallery = ImageResource::collection($room->gallery);
 
         if ($reviewsCnt) {
             $sum = 0;
@@ -23,21 +25,23 @@ class RoomResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'capacity' => $this->capacity,
-            'base_price' => $this->base_price,
-            'is_available' => $this->is_available,
-            'room_image' => $this->room_image,
-            'imageUrl' => $this->imageUrl,
-            'amenities' => json_decode($this->amenities),
-            'created_at' => $this->created_at->format('d-m-Y H:i'),
-            'updated_at' => $this->updated_at->format('d-m-Y H:i'),
-            'prices' => $this->prices,
+            'id' => $room->id,
+            'name' => $room->name,
+            'description' => $room->description,
+            'capacity' => $room->capacity,
+            'base_price' => $room->base_price,
+            'is_available' => $room->is_available,
+            'room_image' => $room->room_image,
+            'imageUrl' => $room->imageUrl,
+            'amenities' => json_decode($room->amenities),
+            'created_at' => $room->created_at->format('d-m-Y H:i'),
+            'updated_at' => $room->updated_at->format('d-m-Y H:i'),
+            'prices' => $room->prices,
             'rating' => $rating,
             'reviewsCnt' => $reviewsCnt,
             'gallery' => $gallery,
+            'price' => $this['price'] ?? 0,
+            'firstDate' => $firstDate,
         ];
     }
 }

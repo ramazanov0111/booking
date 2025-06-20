@@ -37,7 +37,6 @@
                                 {{ room.name }}
                             </option>
                         </select>
-
                         <flat-pickr
                             v-model="filters.date_range"
                             :config="dateConfig"
@@ -45,6 +44,16 @@
                             class="date-picker"
                             @on-change="loadData"
                         />
+                        <select v-model="filters.status" class="filter-select" @change="loadData">
+                            <option value="">Все</option>
+                            <option
+                                v-for="status in statusList"
+                                :key="status.key"
+                                :value="status.key"
+                            >
+                                {{ status.value }}
+                            </option>
+                        </select>
                     </div>
 
                 </div>
@@ -147,7 +156,8 @@ const users = ref([])
 const filters = ref({
     user_id: '',
     room_id: '',
-    date_range: ''
+    date_range: '',
+    status: ''
 })
 
 const statuses = ref({
@@ -156,6 +166,13 @@ const statuses = ref({
     'paid': 'Оплачено',
     'canceled': 'Отменено',
 })
+
+const statusList = [
+    { key: 'pending', value: 'В обработке' },
+    { key: 'confirmed', value: 'Подтверждено' },
+    { key: 'paid', value: 'Оплачено' },
+    { key: 'canceled', value: 'Отменено' }
+];
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -176,6 +193,7 @@ const loadData = async () => {
             page: currentPage.value,
             user_id: filters.value.user_id,
             room_id: filters.value.room_id,
+            status: filters.value.status,
             // Разбиваем диапазон дат на start_date и end_date
             ...(filters.value.date_range && {
                 start_date: filters.value.date_range.split(" — ")[0],

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,13 +24,18 @@ class AdminBookingController extends Controller
         $roomId = $request->get('room_id');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
+        $status = $request->get('status');
+
+        $startDate = $startDate ? Carbon::parse($startDate) : null;
+        $endDate = $endDate ? Carbon::parse($endDate) : null;
 
         $bookings = Booking::with(['user', 'room'])
             ->when(!is_null($userId), fn($q) => $q->where('user_id', $userId))
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
+            ->when(!is_null($status), fn($q) => $q->where('status', $status))
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('check_in', [$startDate, $endDate])
-                    ->whereBetween('check_out', [$startDate, $endDate]);
+                    ->orWhereBetween('check_out', [$startDate, $endDate]);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(25);
