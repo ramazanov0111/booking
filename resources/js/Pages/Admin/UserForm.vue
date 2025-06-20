@@ -263,7 +263,7 @@ const validateForm = () => {
         if (form.value.new_password && form.value.new_password.length < 8) {
             errors.value.new_password = 'Длина пароля должна быть минимум 8 символов!'
             isValid = false
-        } else if (!latinRegex.test(form.value.new_password)) {
+        } else if (form.value.new_password && !latinRegex.test(form.value.new_password)) {
             errors.value.new_password = 'Пароль должен содержать только латиницу и цифры!'
             isValid = false
         }

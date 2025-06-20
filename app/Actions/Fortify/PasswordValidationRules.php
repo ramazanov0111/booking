@@ -24,6 +24,6 @@ trait PasswordValidationRules
      */
     protected function updatePasswordRules(): array
     {
-        return ['string', Password::default(), 'confirmed'];
+        return ['string', Password::default()];
     }
 }
