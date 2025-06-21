@@ -30,7 +30,7 @@ class UpdateUserRequest extends FormRequest
             'login' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'new_password' => $this->updatePasswordRules(),
-            'phone' => ['string', 'min:18', 'max:18'],
+            'phone' => ['required', 'string', 'min:18', 'max:18'],
             'role' => ['string'],
             'deleted' => ['boolean']
         ];

@@ -155,7 +155,7 @@ export default {
         route,
         async logout() {
             router.post(route('logout'));
-            // router.get(route('login'));
+            window.location.href = route('main')
         }
     }
 }

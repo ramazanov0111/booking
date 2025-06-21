@@ -9,6 +9,7 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import 'flatpickr/dist/flatpickr.min.css';
+import {route} from "ziggy-js";
 
 defineProps({
     title: String,
@@ -26,6 +27,7 @@ const switchToTeam = (team) => {
 
 const logout = () => {
     router.post(route('logout'));
+    window.location.href = route('main')
 };
 </script>
 

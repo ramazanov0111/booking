@@ -30,7 +30,7 @@ class StoreUserRequest extends FormRequest
             'login' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
-            'phone' => ['string', 'min:18', 'max:18'],
+            'phone' => ['required', 'string', 'min:18', 'max:18'],
             'role' => ['string'],
             'deleted' => ['boolean']
         ];
