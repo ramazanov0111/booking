@@ -25,7 +25,7 @@
                     <!-- Основные параметры -->
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <InputLabel for="name" value="Имя" />
+                            <InputLabel for="name" value="Имя" required="1"/>
                             <TextInput
                                 id="name"
                                 v-model="form.name"
@@ -35,7 +35,7 @@
                             <InputError class="mt-2" :message="errors.name"/>
                         </div>
                         <div>
-                            <InputLabel for="lastname" value="Фамилия"/>
+                            <InputLabel for="lastname" value="Фамилия" required="1"/>
                             <TextInput
                                 id="lastname"
                                 v-model="form.lastname"
@@ -45,7 +45,7 @@
                             <InputError class="mt-2" :message="errors.lastname"/>
                         </div>
                         <div class="mt-4">
-                            <InputLabel for="login" value="Логин"/>
+                            <InputLabel for="login" value="Логин" required="1"/>
                             <TextInput
                                 id="login"
                                 v-model="form.login"
@@ -56,7 +56,7 @@
                         </div>
                         <!-- E-mail -->
                         <div class="mt-4">
-                            <InputLabel for="email" value="Email"/>
+                            <InputLabel for="email" value="Email" required="1"/>
                             <TextInput
                                 id="email"
                                 v-model="form.email"
@@ -68,7 +68,7 @@
                         </div>
 
                         <div v-if="!isEditMode" class="mt-4">
-                            <InputLabel for="password" value="Пароль"/>
+                            <InputLabel for="password" value="Пароль" required="1"/>
                             <TextInput
                                 id="password"
                                 v-model="form.password"
@@ -91,7 +91,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <InputLabel for="password_confirmation" value="Подтверждение пароля"/>
+                            <InputLabel for="password_confirmation" value="Подтверждение пароля" :required="!isEditMode" />
                             <TextInput
                                 id="password_confirmation"
                                 v-model="form.password_confirmation"
@@ -103,15 +103,15 @@
 
                         <!-- Номер телефона -->
                         <div class="mt-4">
-                            <InputLabel for="phone" value="Телефон"/>
-                                                        <TextInput
-                                                            id="phone"
-                                                            v-model="form.phone"
-                                                            type="text"
-                                                            class="mt-1 block w-full"
-                                                            placeholder="+7 (___) ___ __ __"
-                                                            @input="change"
-                                                        />
+                            <InputLabel for="phone" value="Телефон" required="1"/>
+                            <TextInput
+                                id="phone"
+                                v-model="form.phone"
+                                type="text"
+                                class="mt-1 block w-full"
+                                placeholder="+7 (___) ___ __ __"
+                                @input="change"
+                            />
                             <InputError class="mt-2" :message="errors.phone"/>
                         </div>
 

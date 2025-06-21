@@ -83,7 +83,7 @@
                             </div>
                             <div class="flex space-x-2">
                                 <button
-                                    v-for="page in meta.to"
+                                    v-for="page in meta.last_page"
                                     :key="page"
                                     @click="changePage(page)"
                                     :class="page === meta.current_page ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"
@@ -129,7 +129,7 @@ const fetchUsers = async (page = 1) => {
 
 // Удаление номера
 const deleteUser = async (id) => {
-    if (confirm('Вы уверены, что хотите удалить номер?')) {
+    if (confirm('Вы уверены, что хотите удалить данного пользователя?')) {
         try {
             await axios.delete(route('users.destroy', id))
 

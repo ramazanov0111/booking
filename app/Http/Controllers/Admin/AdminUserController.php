@@ -31,7 +31,8 @@ class AdminUserController extends Controller
                 'per_page' => $users->perPage(),
                 'from' => $users->firstItem(),
                 'to' => $users->lastItem(),
-                'current_page' => $users->currentPage()
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
             ]
         ]);
     }

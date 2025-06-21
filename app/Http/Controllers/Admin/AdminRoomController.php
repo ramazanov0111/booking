@@ -45,6 +45,7 @@ class AdminRoomController extends Controller
                 'from' => $rooms->firstItem(),
                 'to' => $rooms->lastItem(),
                 'current_page' => $rooms->currentPage(),
+                'last_page' => $rooms->lastPage(),
             ]
         ]);
     }
