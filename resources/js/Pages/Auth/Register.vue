@@ -67,8 +67,6 @@ const validateForm = () => {
         isValid = false
     }
 
-    console.log(form.phone, form.phone.length)
-
     if (form.phone.length < 18 || form.phone.toString().includes('_')) {
         errors.value.phone = 'Длина номера телефона не соответствует формату!'
         isValid = false
