@@ -76,7 +76,7 @@
                                 class="mt-1 block w-full"
                                 required
                             />
-                            <InputError class="mt-2" :message="errors.password"/>
+                            <InputError v-for="error in errors.password" class="mt-2" :message="error"/>
                         </div>
 
                         <div v-if="isEditMode" class="mt-4">
@@ -87,7 +87,7 @@
                                 type="password"
                                 class="mt-1 block w-full"
                             />
-                            <InputError class="mt-2" :message="errors.new_password"/>
+                            <InputError v-for="error in errors.new_password" class="mt-2" :message="error"/>
                         </div>
 
                         <div class="mt-4">
@@ -194,8 +194,8 @@ const errors = ref({
     name: '',
     lastname: '',
     login: '',
-    password: '',
-    new_password: '',
+    password: [],
+    new_password: [],
     password_confirmation: '',
     phone: '',
 })
@@ -230,13 +230,14 @@ const loadUserData = async () => {
 const validateForm = () => {
     let isValid = true
     const latinRegex = /^[a-zA-Z0-9]+$/;
+    const passRegex = /(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{8,}/g;
 
     errors.value = {
         name: '',
         lastname: '',
         login: '',
-        password: '',
-        new_password: '',
+        password: [],
+        new_password: [],
         password_confirmation: '',
         phone: '',
     }
@@ -261,18 +262,22 @@ const validateForm = () => {
 
     if (isEditMode.value) {
         if (form.value.new_password && form.value.new_password.length < 8) {
-            errors.value.new_password = 'Длина пароля должна быть минимум 8 символов!'
+            errors.value.new_password.push('Длина пароля должна быть минимум 8 символов!')
             isValid = false
-        } else if (form.value.new_password && !latinRegex.test(form.value.new_password)) {
-            errors.value.new_password = 'Пароль должен содержать только латиницу и цифры!'
+        }
+
+        if (!passRegex.test(form.value.new_password)) {
+            errors.value.new_password.push('Пароль должен содержать латиницу, строчные и прописные буквы, спецсимволы и цифры!')
             isValid = false
         }
     } else {
         if (form.value.password.length < 8) {
-            errors.value.password = 'Длина пароля должна быть минимум 8 символов!'
+            errors.value.password.push('Длина пароля должна быть минимум 8 символов!')
             isValid = false
-        } else if (!latinRegex.test(form.value.password)) {
-            errors.value.password = 'Пароль должен содержать только латиницу и цифры!'
+        }
+
+        if (!passRegex.test(form.value.password)) {
+            errors.value.password.push('Пароль должен содержать латиницу, строчные и прописные буквы, спецсимволы и цифры!')
             isValid = false
         }
     }

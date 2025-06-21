@@ -57,7 +57,7 @@ const validateForm = () => {
         isValid = false
     }
 
-    if (form.password.trim() && !passRegex.test(form.password)) {
+    if (!passRegex.test(form.password)) {
         errors.value.password.push('Пароль должен содержать латиницу, строчные и прописные буквы, спецсимволы и цифры!')
         isValid = false
     }
