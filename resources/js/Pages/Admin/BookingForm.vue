@@ -328,7 +328,7 @@ const handleSubmit = async () => {
 const getDisabledDatesForRoom = async () =>  {
     try {
         const response1 = await axios.get(route('blocked_dates.by_room', form.value.room_id))
-        const response2 = await axios.get(route('bookings.by_room', form.value.room_id))
+        const response2 = await axios.get(route('booking_dates.by_room', form.value.room_id))
 
         disabledDates.value = [...response1.data, ...response2.data]
 

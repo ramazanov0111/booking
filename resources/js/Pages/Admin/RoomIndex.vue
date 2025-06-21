@@ -12,10 +12,6 @@
                 <!-- Заголовок и кнопка добавления -->
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold">Управление номерами</h1>
-                    <Link :href="route('rooms.create')"
-                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        + Добавить номер
-                    </Link>
                 </div>
                 <div class="controls">
                     <div class="filters">
@@ -24,6 +20,7 @@
                             type="text"
                             placeholder="Введите название номера"
                             class="w-full p-2 border rounded-lg"
+                            @change.prevent="fetchRooms"
                         >
                         <input
                             v-model.number="filters.base_price_min"
@@ -32,6 +29,7 @@
                             step="100"
                             placeholder="Цена мин."
                             class="p-2 border rounded-lg pl-8 number"
+                            @change.prevent="fetchRooms"
                         >
                         <input
                             v-model.number="filters.base_price_max"
@@ -40,6 +38,7 @@
                             step="100"
                             placeholder="Цена макс."
                             class="p-2 border rounded-lg pl-8 number"
+                            @change.prevent="fetchRooms"
                         >
                         <input
                             v-model.number="filters.capacity"
@@ -47,14 +46,19 @@
                             min="1"
                             placeholder="Вместимость"
                             class="w-full p-2 border rounded-lg number"
+                            @change.prevent="fetchRooms"
                         >
-                        <select v-model="filters.status" class="filter-select" >
+                        <select v-model="filters.status" class="filter-select" @change.prevent="fetchRooms">
                             <option value="">Все</option>
                             <option value="1">Доступен</option>
                             <option value="0">Не доступен</option>
                         </select>
-                        <button @click.prevent="fetchRooms" class="bg-blue-600 text-white px-9 py-2 rounded-lg hover:bg-blue-700 transition">Фильтровать</button>
+<!--                        <button @click.prevent="fetchRooms" class="bg-blue-600 text-white px-9 py-2 rounded-lg hover:bg-blue-700 transition">Фильтровать</button>-->
                     </div>
+                    <Link :href="route('rooms.create')"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        + Добавить номер
+                    </Link>
                 </div>
 
                 <!-- Таблица номеров -->

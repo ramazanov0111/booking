@@ -184,7 +184,7 @@ const getDisabledDatesForRoom = async () =>  {
     if (props.show) {
         try {
             const response1 = await axios.get(route('blocked_dates.by_room', props.room?.id))
-            const response2 = await axios.get(route('bookings.by_room', props.room?.id))
+            const response2 = await axios.get(route('booking_dates.by_room', props.room?.id))
 
             disabledDates.value = [...response1.data, ...response2.data]
 

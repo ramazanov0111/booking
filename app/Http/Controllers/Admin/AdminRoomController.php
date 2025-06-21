@@ -33,7 +33,8 @@ class AdminRoomController extends Controller
             ->when(!is_null($name), fn($q) => $q->where('name', 'like', '%' . $name . '%'))
             ->when(!is_null($capacity), fn($q) => $q->where('capacity', (int)$capacity))
             ->when(!is_null($status), fn($q) => $q->where('is_available', (bool)$status))
-            ->when($minBasePrice && $maxBasePrice, fn($q) => $q->whereBetween('base_price', [$minBasePrice, $maxBasePrice]))
+            ->when(!is_null($minBasePrice), fn($q) => $q->where('base_price', '>=', $minBasePrice))
+            ->when(!is_null($maxBasePrice), fn($q) => $q->where('base_price', '<=', $maxBasePrice))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

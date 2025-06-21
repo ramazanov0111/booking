@@ -30,22 +30,22 @@ class Room extends Model
         'Тапочки'
     ];
 
-    public function prices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function prices():HasMany
     {
         return $this->hasMany(Price::class);
     }
 
-    public function bookings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
-    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
-    public function blocked_dates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function blocked_dates(): HasMany
     {
         return $this->hasMany(BlockedDate::class);
     }

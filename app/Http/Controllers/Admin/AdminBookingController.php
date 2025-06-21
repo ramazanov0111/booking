@@ -99,4 +99,14 @@ class AdminBookingController extends Controller
         $booking->delete();
         return response()->noContent();
     }
+
+    public function getBookingsByRoom($roomId): JsonResponse
+    {
+        $bookings = Booking::with(['user'])
+            ->where('room_id', $roomId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
+        return response()->json(BookingResource::collection($bookings));
+    }
 }

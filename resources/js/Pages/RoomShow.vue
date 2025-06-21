@@ -320,7 +320,7 @@ const loadPrice = async () => {
 const getDisabledDatesForRoom = async () =>  {
     try {
         const response1 = await axios.get(route('blocked_dates.by_room', roomId))
-        const response2 = await axios.get(route('bookings.by_room', roomId))
+        const response2 = await axios.get(route('booking_dates.by_room', roomId))
 
         disabledDates.value = [...response1.data, ...response2.data]
     } catch (error) {

@@ -25,7 +25,7 @@
                       enctype="multipart/form-data">
                     <!-- Название -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 mb-2">Название номера</label>
+                        <label class="block text-gray-700 mb-2">Название номера <span class="required">*</span></label>
                         <input
                             v-model="form.name"
                             type="text"
@@ -37,7 +37,7 @@
 
                     <!-- Описание -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 mb-2">Описание</label>
+                        <label class="block text-gray-700 mb-2">Описание <span class="required">*</span></label>
                         <textarea
                             v-model="form.description"
                             rows="4"
@@ -51,7 +51,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
                         <!-- Вместимость -->
                         <div>
-                            <label class="block text-gray-700 mb-2">Вместимость</label>
+                            <label class="block text-gray-700 mb-2">Вместимость <span class="required">*</span></label>
                             <input
                                 v-model.number="form.capacity"
                                 type="number"
@@ -64,7 +64,7 @@
 
                         <!-- Цена -->
                         <div>
-                            <label class="block text-gray-700 mb-2">Базовая цена</label>
+                            <label class="block text-gray-700 mb-2">Базовая цена <span class="required">*</span></label>
                             <div class="relative">
                                 <input
                                     v-model.number="form.base_price"
@@ -102,7 +102,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-gray-700 mb-2">Новое изображение</label>
+                            <label class="block text-gray-700 mb-2">Главное изображение <span v-if="!form.imageUrl" class="required">*</span></label>
                             <input
                                 type="file"
                                 class="w-full p-2 border rounded-lg"
@@ -141,7 +141,7 @@
 
                     <!-- Удобства -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 mb-2">Удобства</label>
+                        <label class="block text-gray-700 mb-2">Удобства <span class="required">*</span></label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <label
                                 v-for="amenity in amenitiesList"
@@ -240,6 +240,71 @@
                 </div>
             </div>
         </div>
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Заголовок -->
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">Запланированные бронирования</h1>
+                </div>
+                <!-- Таблица цен -->
+                <div class="bg-white p-12 rounded-lg shadow-md">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Дата заселения</th>
+                            <th>Дата выселения</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+
+                        <tbody v-if="loading">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="loader"></div>
+                            </td>
+                        </tr>
+                        </tbody>
+
+                        <tbody v-else>
+                        <tr v-for="booking in bookings" :key="booking.id">
+
+                            <td>{{ booking.user.name }} - {{  booking.user.lastname }}</td>
+                            <td>{{ formatDate(booking.check_in) }}</td>
+                            <td>{{ formatDate(booking.check_out) }}</td>
+                            <td>{{ statuses[booking.status] }}</td>
+
+                            <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                                <Link :href="route('booking.edit', booking.id)"
+                                      class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-edit"></i>
+                                </Link>
+                                <button
+                                    @click="deleteBooking(booking.id)"
+                                    class="text-red-600 hover:text-red-900"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Пагинация -->
+                    <div class="pagination">
+                        <button
+                            v-for="page in totalPages"
+                            :key="page"
+                            :class="{ active: currentPage === page }"
+                            @click="changePage(page)"
+                        >
+                            {{ page }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </AppLayout>
 </template>
 
@@ -296,6 +361,7 @@ const errors = ref({
 
 const room = route().params.room
 const prices = ref([])
+const bookings = ref([])
 
 const uploadFile = async (e) => {
     if (e.target.files) {
@@ -370,6 +436,11 @@ const loadRoomData = async () => {
         }
 
         prices.value = data.data.prices || [];
+
+        const response = await axios.get(route('bookings.by_room', room))
+
+        bookings.value = response.data || [];
+
     } catch (error) {
         console.error('Ошибка загрузки данных:', error)
         window.location.href = route('rooms.list');
@@ -409,10 +480,27 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ru-RU')
 }
 
+const statuses = ref({
+    'pending': 'В обработке',
+    'confirmed': 'Подтверждено',
+    'paid': 'Оплачено',
+    'canceled': 'Отменено',
+})
+
 const deletePrice = async (price) => {
     if (!confirm('Удалить эту цену?')) return
     try {
         await axios.delete(route('prices.destroy', price.id))
+        await loadRoomData()
+    } catch (error) {
+        console.error('Ошибка удаления:', error)
+    }
+}
+
+const deleteBooking = async (booking) => {
+    if (!confirm('Удалить это бронирование?')) return
+    try {
+        await axios.delete(route('booking.destroy', booking.id))
         await loadRoomData()
     } catch (error) {
         console.error('Ошибка удаления:', error)
@@ -488,6 +576,10 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+
+.required {
+    color: #e53935;
+}
 
 .preview-item {
     position: relative;
