@@ -30,8 +30,8 @@ class AdminPriceController extends Controller
         $prices = Price::with('room')
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('start_date', [$startDate, $endDate])
-                    ->orWhereBetween('end_date', [$startDate, $endDate]);
+                $q->where('start_date', '<=', $endDate)
+                    ->where('end_date', '>=', $startDate);
             })
             ->orderBy('start_date', 'desc')
             ->paginate(25);

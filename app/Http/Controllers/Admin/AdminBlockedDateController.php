@@ -29,8 +29,8 @@ class AdminBlockedDateController extends Controller
         $blockedDates = BlockedDate::with('room')
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('date_start', [$startDate, $endDate])
-                    ->orWhereBetween('date_end', [$startDate, $endDate]);
+                $q->where('date_start', '<=', $endDate)
+                    ->where('date_end', '>=', $startDate);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(25);

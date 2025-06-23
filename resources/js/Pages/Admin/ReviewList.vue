@@ -84,7 +84,7 @@
                             <td>{{ getStatusPublish(review.published) }}</td>
 
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                <button
+                                <button v-if="!review.published"
                                     @click="publishReview(review.id)"
                                     class="text-blue-600 hover:text-blue-900"
                                 >
@@ -102,15 +102,23 @@
                     </table>
 
                     <!-- Пагинация -->
-                    <div class="pagination">
-                        <button
-                            v-for="page in totalPages"
-                            :key="page"
-                            :class="{ active: currentPage === page }"
-                            @click="changePage(page)"
-                        >
-                            {{ page }}
-                        </button>
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm text-gray-700">
+                                Показано с {{ meta.from }} по {{ meta.to }} из {{ meta.total }}
+                            </div>
+                            <div class="flex space-x-2">
+                                <button
+                                    v-for="page in meta.last_page"
+                                    :key="page"
+                                    @click="changePage(page)"
+                                    :class="page === meta.current_page ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"
+                                    class="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-50"
+                                >
+                                    {{ page }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,8 +146,8 @@ const filters = ref({
     room_id: '',
     date_range: ''
 })
-const currentPage = ref(1)
-const totalPages = ref(1)
+
+const meta = ref({})
 const loading = ref(false)
 
 // Конфигурация календаря
@@ -154,7 +162,7 @@ const loadData = async () => {
     try {
         loading.value = true
         const params = {
-            page: currentPage.value,
+            page: meta.value.current_page,
             userId: filters.value.user_id,
             roomId: filters.value.room_id,
             // Разбиваем диапазон дат на start_date и end_date
@@ -166,7 +174,9 @@ const loadData = async () => {
 
         const response = await axios.get(route('reviews.index'), {params})
         reviews.value = response.data.data
-        totalPages.value = response.data.last_page
+
+        const { data, ...rest } = response.data;
+        meta.value = {...rest}
     } finally {
         loading.value = false
     }
@@ -226,7 +236,7 @@ const getStatusPublish = (status) => {
 
 // Смена страницы
 const changePage = (page) => {
-    currentPage.value = page;
+    meta.value.current_page = page;
 }
 
 // Инициализация

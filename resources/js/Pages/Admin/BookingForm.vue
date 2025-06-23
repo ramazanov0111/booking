@@ -150,7 +150,6 @@ const paymentMethods = [
 ];
 
 const statusList = [
-    { key: 'pending', value: 'В обработке' },
     { key: 'confirmed', value: 'Подтверждено' },
     { key: 'paid', value: 'Оплачено' },
     { key: 'canceled', value: 'Отменено' }

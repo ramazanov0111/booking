@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use Carbon\Carbon;
+use DateInterval;
+use DatePeriod;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,6 +27,7 @@ class AdminBookingController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
         $status = $request->get('status');
+        $isNotCanceled = $request->get('is_not_canceled');
 
         $startDate = $startDate ? Carbon::parse($startDate) : null;
         $endDate = $endDate ? Carbon::parse($endDate) : null;
@@ -33,9 +36,15 @@ class AdminBookingController extends Controller
             ->when(!is_null($userId), fn($q) => $q->where('user_id', $userId))
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
             ->when(!is_null($status), fn($q) => $q->where('status', $status))
+            ->when(!is_null($isNotCanceled), function ($q) {
+                $today = Carbon::parse(today());
+                $q->whereNot('status', 'canceled')
+                    ->where('check_in', '<=', $today)
+                    ->where('check_out', '>=', $today);
+            })
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('check_in', [$startDate, $endDate])
-                    ->orWhereBetween('check_out', [$startDate, $endDate]);
+                $q->where('check_in', '<=', $endDate)
+                    ->where('check_out', '>=', $startDate);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(25);
