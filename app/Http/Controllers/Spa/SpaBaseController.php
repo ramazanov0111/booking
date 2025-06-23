@@ -34,7 +34,7 @@ class SpaBaseController extends Controller
         $checkOut = $checkOut ? Carbon::parse($checkOut) : null;
 
         $rooms = Room::with(['prices' => function ($query) {
-            $query->orderBy('updated_at'); // Сортируем цены
+            $query->orderBy('updated_at', 'desc'); // Сортируем цены
         }])
             ->where('is_available', true)
             ->when(!is_null($capacity), fn($q) => $q->where('capacity', '>=', $capacity))
