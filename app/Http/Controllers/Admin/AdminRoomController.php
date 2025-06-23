@@ -162,7 +162,6 @@ class AdminRoomController extends Controller
 
         $rooms = Room::query()
             ->where('is_available', 1)
-            ->where('base_price', '>=', 3000)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -185,6 +184,7 @@ class AdminRoomController extends Controller
             }
 
             foreach ($room->bookings->all() as $bookingDate) {
+                if ($bookingDate->status !== 'canceled')
                 $period = new DatePeriod(
                     $bookingDate->check_in,
                     new DateInterval('P1D'),
