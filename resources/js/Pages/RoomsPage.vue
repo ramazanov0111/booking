@@ -16,10 +16,12 @@
                             <div class="flex justify-between items-center">
                                 <div class="date-range-picker mr-3">
                                     <VueDatePicker
+                                        ref="checkInPicker"
                                         v-model="filters.checkIn"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
+                                        @update:model-value="handleCheckInSelected"
                                     />
                                 </div>
                             </div>
@@ -31,10 +33,12 @@
                             <div class="flex justify-between items-center">
                                 <div class="date-range-picker">
                                     <VueDatePicker
+                                        ref="checkOutPicker"
                                         v-model="filters.checkOut"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
+                                        @update:model-value="handleCheckOutSelected"
                                     />
                                 </div>
                             </div>
@@ -124,7 +128,7 @@
                         <Link :href="route('room.show', room.id)" class="grid">
                             <div class="room-image">
                                 <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
-                                <div class="price-badge" :class="{ 'strikethrough': room.price.price > 0 }">{{ formatPrice(room.base_price) }} / ночь</div>
+                                <div class="price-badge" v-if="room.price < room.base_price || room.price.price < room.base_price" :class="{ 'strikethrough': room.price.price > 0 && room.price.price < room.base_price }">{{ formatPrice(room.base_price) }} / ночь</div>
                                 <div class="new-price" v-if="room.price.price > 0">{{ formatPrice(room.price.price) }} / ночь</div>
                             </div>
 
@@ -176,7 +180,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, watchEffect, nextTick} from 'vue'
 import SpaLayout from "@/Layouts/SpaLayout.vue";
 import {route} from "ziggy-js";
 import {Russian} from 'flatpickr/dist/l10n/ru'
@@ -218,6 +222,8 @@ const filters = ref({
     amenities: []
 })
 
+const checkInPicker = ref(null)
+const checkOutPicker = ref(null)
 const increment = async () => {
     if (filters.value.guests < guestsParams.value.max) {
         filters.value.guests = filters.value.guests + guestsParams.value.step
@@ -279,10 +285,36 @@ const openModal = (room, user) => {
     }
 }
 
-// Следим за изменениями фильтров
-// watch([filters], () => {
-//     loadRooms()
-// }, {deep: true})
+const handleInput = (nextField) => {
+    console.log(nextField)
+    // Автоматический переход к следующему полю
+    nextTick(() => {
+        this.$refs.checkOutInput.focus();
+    });
+    nextTick(() => {
+        this.$refs[nextField].focus();
+    });
+}
+
+const handleCheckInSelected = () => {
+    if (filters.value.checkIn) {
+        nextTick(() => {
+            // Альтернатива: если нужно открыть календарь сразу
+            checkOutPicker.value.openMenu();
+        });
+    }
+}
+
+const handleCheckOutSelected = () =>  {
+    if (filters.value.checkOut) {
+        // После выбора даты выезда можно перейти к следующему блоку
+        // Например, к полю "Гости"
+        nextTick(() => {
+            // Фокусируемся на следующем элементе
+            document.querySelector('.counter-btn').focus();
+        });
+    }
+}
 
 // Инициализация
 loadRooms()

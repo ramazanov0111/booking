@@ -33,13 +33,11 @@ class SpaBaseController extends Controller
         $checkIn = $checkIn ? Carbon::parse($checkIn) : null;
         $checkOut = $checkOut ? Carbon::parse($checkOut) : null;
 
-        $rooms = Room::with('prices')
+        $rooms = Room::with(['prices' => function ($query) {
+            $query->orderBy('updated_at', 'desc'); // Сортируем цены
+        }])
             ->where('is_available', true)
             ->when(!is_null($capacity), fn($q) => $q->where('capacity', '>=', $capacity))
-//            ->when($checkIn && $checkOut, function ($q) use ($checkIn, $checkOut) {
-//                $q->whereBetween('start_date', [$checkIn, $checkOut])
-//                    ->whereBetween('end_date', [$checkIn, $checkOut]);
-//            })
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
