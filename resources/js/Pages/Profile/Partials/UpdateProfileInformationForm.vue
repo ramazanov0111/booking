@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import ActionMessage from '@/Components/ActionMessage.vue';
 import FormSection from '@/Components/FormSection.vue';
@@ -8,6 +8,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Inputmask from "inputmask/dist/inputmask.es6.js";
 
 const props = defineProps({
     user: Object,
@@ -22,11 +23,21 @@ const form = useForm({
     phone: props.user.phone,
 });
 
+// Ошибки валидации
+const errors = ref({
+    name: '',
+    lastname: '',
+    login: '',
+    phone: '',
+})
+
 const verificationLinkSent = ref(null);
 const photoPreview = ref(null);
 const photoInput = ref(null);
 
 const updateProfileInformation = () => {
+    if (!validateForm()) return
+
     if (photoInput.value) {
         form.photo = photoInput.value.files[0];
     }
@@ -37,6 +48,71 @@ const updateProfileInformation = () => {
         onSuccess: () => clearPhotoFileInput(),
     });
 };
+
+const change = async (value) => {
+    if (!value) return;
+    let val = value;
+    if (val[0] === '8') {
+        val = val.replace('8', '+7');
+    }
+    if (val.replace(/[^0-9]+/g, '') === '789') {
+        val = '79';
+    }
+    this.$emit('input', val);
+}
+
+const bindPhoneMask = async (inputElement, regexMask = null, placeholder = null) => {
+    if (!regexMask) regexMask = '^\\+7 \\([3489]\\d\\d\\) \\d\\d\\d \\d\\d \\d\\d$';
+    if (!placeholder) placeholder = '+7 (___) ___ __ __';
+
+    Inputmask({
+        regex: regexMask,
+        placeholder: placeholder,
+        postValidation: buffer => {
+            let nums = buffer.join('').replace(/[^0-9]+/g, '');
+            let hasSevenNumbersInARow = (/(\d)\1{6}/g).test(nums);
+            return !hasSevenNumbersInARow;
+        }
+    }).mask(inputElement);
+}
+
+const validateForm = () => {
+    let isValid = true
+    const latinRegex = /^[a-zA-Z0-9]+$/;
+    const passRegex = /(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{8,}/g;
+
+    errors.value = {
+        name: '',
+        lastname: '',
+        login: '',
+        phone: '',
+    }
+
+    if (!form.name.trim()) {
+        errors.value.name = 'Введите имя пользователя'
+        isValid = false
+    }
+
+    if (!form.lastname.trim()) {
+        errors.value.lastname = 'Введите фамилию пользователя'
+        isValid = false
+    }
+
+    if (!form.login.trim()) {
+        errors.value.login = 'Введите логин пользователя'
+        isValid = false
+    } else if (!latinRegex.test(form.login)) {
+        errors.value.login = 'Логин должен содержать только латиницу и цифры!'
+        isValid = false
+    }
+
+    if (form.phone.length < 18 || form.phone.toString().includes('_')) {
+        errors.value.phone = 'Длина номер телефона не соответствует формату!'
+        isValid = false
+    }
+
+    return isValid
+}
 
 const sendEmailVerification = () => {
     verificationLinkSent.value = true;
@@ -75,16 +151,22 @@ const clearPhotoFileInput = () => {
         photoInput.value.value = null;
     }
 };
+
+// Инициализация
+onMounted(() => {
+    let selector = document.getElementById('phone');
+    bindPhoneMask(selector);
+})
 </script>
 
 <template>
     <FormSection @submitted="updateProfileInformation">
         <template #title>
-            Profile Information
+            Учетные данные
         </template>
 
         <template #description>
-            Update your account's profile information and email address.
+            Обновите ваши данные.
         </template>
 
         <template #form>
@@ -132,7 +214,7 @@ const clearPhotoFileInput = () => {
 
             <!-- Имя -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="name" value="Имя" />
+                <InputLabel for="name" value="Имя" required="1" />
                 <TextInput
                     id="name"
                     v-model="form.name"
@@ -141,12 +223,12 @@ const clearPhotoFileInput = () => {
                     required
                     autocomplete="name"
                 />
-                <InputError :message="form.errors.name" class="mt-2" />
+                <InputError :message="errors.name" class="mt-2" />
             </div>
 
             <!-- Фамилия -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="lastname" value="Фамилия" />
+                <InputLabel for="lastname" value="Фамилия" required="1" />
                 <TextInput
                     id="lastname"
                     v-model="form.lastname"
@@ -155,12 +237,12 @@ const clearPhotoFileInput = () => {
                     required
                     autocomplete="lastname"
                 />
-                <InputError :message="form.errors.lastname" class="mt-2" />
+                <InputError :message="errors.lastname" class="mt-2" />
             </div>
 
             <!-- Логин -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="login" value="Логин" />
+                <InputLabel for="login" value="Логин" required="1" />
                 <TextInput
                     id="login"
                     v-model="form.login"
@@ -169,12 +251,12 @@ const clearPhotoFileInput = () => {
                     required
                     autocomplete="username"
                 />
-                <InputError :message="form.errors.login" class="mt-2" />
+                <InputError :message="errors.login" class="mt-2" />
             </div>
 
             <!-- Email -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Email" required="1" />
                 <TextInput
                     id="email"
                     v-model="form.email"
@@ -183,7 +265,7 @@ const clearPhotoFileInput = () => {
                     required
                     autocomplete="email"
                 />
-                <InputError :message="form.errors.email" class="mt-2" />
+                <InputError :message="errors.email" class="mt-2" />
 
                 <div v-if="$page.props.jetstream.hasEmailVerification && user.email_verified_at === null">
                     <p class="text-sm mt-2">
@@ -208,21 +290,23 @@ const clearPhotoFileInput = () => {
 
             <!-- Телефон -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="phone" value="Телефон" />
+                <InputLabel for="phone" value="Телефон" required="1" />
                 <TextInput
                     id="phone"
                     v-model="form.phone"
                     type="text"
                     class="mt-1 block w-full"
+                    placeholder="+7 (___) ___ __ __"
+                    @input="change"
                     required
                 />
-                <InputError :message="form.errors.phone" class="mt-2" />
+                <InputError :message="errors.phone" class="mt-2" />
             </div>
         </template>
 
         <template #actions>
             <ActionMessage :on="form.recentlySuccessful" class="me-3">
-                Saved.
+                Сохранено.
             </ActionMessage>
 
             <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

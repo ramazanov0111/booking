@@ -289,7 +289,7 @@ const validateForm = () => {
         isValid = false
     }
 
-    if (form.value.phone.length < 18) {
+    if (form.value.phone.length < 18 || form.value.phone.toString().includes('_')) {
         errors.value.phone = 'Длина номер телефона не соответствует формату!'
         isValid = false
     }
