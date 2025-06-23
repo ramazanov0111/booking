@@ -18,6 +18,7 @@
                                     <VueDatePicker
                                         ref="checkInPicker"
                                         v-model="filters.checkIn"
+                                        :min-date="minDate"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
@@ -35,6 +36,7 @@
                                     <VueDatePicker
                                         ref="checkOutPicker"
                                         v-model="filters.checkOut"
+                                        :min-date="minDateForCheckOut"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
@@ -180,7 +182,7 @@
 </template>
 
 <script setup>
-import {ref, computed, watch, watchEffect, nextTick} from 'vue'
+import {ref, computed, watch, watchEffect, nextTick, onMounted} from 'vue'
 import SpaLayout from "@/Layouts/SpaLayout.vue";
 import {route} from "ziggy-js";
 import {Russian} from 'flatpickr/dist/l10n/ru'
@@ -221,6 +223,18 @@ const filters = ref({
     guests: 1,
     amenities: []
 })
+
+// Минимальная дата для заезда - текущий день
+const minDate = ref(new Date());
+minDate.value.setHours(0, 0, 0, 0); // Обнуляем время
+
+// Минимальная дата для выезда:
+// - Если выбрана дата заезда, то дата заезда
+// - Иначе текущий день
+const minDateForCheckOut = computed(() => {
+    return filters.value.checkIn || minDate.value;
+});
+
 
 const checkInPicker = ref(null)
 const checkOutPicker = ref(null)
@@ -317,7 +331,17 @@ const handleCheckOutSelected = () =>  {
 }
 
 // Инициализация
-loadRooms()
+onMounted(() => {
+    loadRooms()
+    const now = new Date();
+    const msUntilMidnight = new Date(now).setHours(24, 0, 0, 0) - now;
+
+    setTimeout(() => {
+        minDate.value = new Date();
+        minDate.value.setHours(0, 0, 0, 0);
+    }, msUntilMidnight);
+});
+
 
 </script>
 

@@ -21,6 +21,7 @@
                     <VueDatePicker
                         v-model="checkInDate"
                         :disabled-dates="disabledDates"
+                        :min-date="minDate"
                         :enable-time-picker="false"
                         format="dd-MM-yyy"
                         auto-apply
@@ -33,6 +34,7 @@
                     <VueDatePicker
                         v-model="checkOutDate"
                         :disabled-dates="disabledDates"
+                        :min-date="minDateForCheckOut"
                         :enable-time-picker="false"
                         format="dd-MM-yyy"
                         auto-apply
@@ -199,6 +201,17 @@ const closeModal = () => {
     emit('close')
 }
 
+// Минимальная дата для заезда - текущий день
+const minDate = ref(new Date());
+minDate.value.setHours(0, 0, 0, 0); // Обнуляем время
+
+// Минимальная дата для выезда:
+// - Если выбрана дата заезда, то дата заезда
+// - Иначе текущий день
+const minDateForCheckOut = computed(() => {
+    return checkInDate.value || minDate.value;
+});
+
 const resetForm = () => {
     checkInDate.value = null
     checkOutDate.value = null
@@ -251,6 +264,13 @@ watch([checkInDate, checkOutDate], () => {
 onMounted(async () => {
     // await loadPrice()
     await getDisabledDatesForRoom()
+    const now = new Date();
+    const msUntilMidnight = new Date(now).setHours(24, 0, 0, 0) - now;
+
+    setTimeout(() => {
+        minDate.value = new Date();
+        minDate.value.setHours(0, 0, 0, 0);
+    }, msUntilMidnight);
 })
 
 </script>
