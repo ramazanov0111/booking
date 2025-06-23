@@ -153,11 +153,16 @@ class AdminRoomController extends Controller
 
     public function enabledRooms(Request $request): JsonResponse
     {
-        $startDate = Carbon::parse($request->get('start_date'));
-        $endDate = Carbon::parse($request->get('end_date'));
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $startDate = $startDate ? Carbon::parse($startDate) : Carbon::parse(today());
+        $endDate = $endDate ? Carbon::parse($endDate) : Carbon::parse(today()->addDay());
+//        dd($startDate, $endDate);
 
         $rooms = Room::query()
             ->where('is_available', 1)
+            ->where('base_price', '>=', 3000)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -165,9 +170,50 @@ class AdminRoomController extends Controller
         foreach ($rooms->all() as $room) {
             $isEnabled = true;
             $newPrice = 0;
-            foreach ($room->bookings->all() as $booking) {
-                if ($startDate->isBetween($booking->check_in, $booking->check_out)
-                    || $endDate->isBetween($booking->check_in, $booking->check_out)) {
+
+            $dates = array();
+            foreach ($room->blocked_dates->all() as $blockedDate) {
+                $period = new DatePeriod(
+                    $blockedDate->date_start,
+                    new DateInterval('P1D'),
+                    new Carbon(strtotime($blockedDate->date_end . ' +1 days'))
+                );
+
+                foreach ($period as $key => $value) {
+                    $dates[] = Carbon::parse($value)->format('d-m-Y');
+                }
+            }
+
+            foreach ($room->bookings->all() as $bookingDate) {
+                $period = new DatePeriod(
+                    $bookingDate->check_in,
+                    new DateInterval('P1D'),
+                    new Carbon(strtotime($bookingDate->check_out . ' +1 days'))
+                );
+
+                foreach ($period as $key => $value) {
+                    $dates[] = Carbon::parse($value)->format('d-m-Y');
+                }
+            }
+
+            $userPeriod = new DatePeriod(
+                $startDate,
+                new DateInterval('P1D'),
+                new Carbon(strtotime($endDate . ' +1 days'))
+            );
+
+            $userDates = array();
+            foreach ($userPeriod as $key => $value) {
+                $userDates[] = Carbon::parse($value)->format('d-m-Y');
+            }
+
+            $enableDate = $startDate;
+            foreach ($userDates as $userDate) {
+                if (!in_array($userDate, $dates)) {
+                    $enableDate = Carbon::parse($userDate);
+                    $isEnabled = true;
+                    break;
+                } else {
                     $isEnabled = false;
                 }
             }
@@ -182,33 +228,14 @@ class AdminRoomController extends Controller
                     }
                 }
 
-                $dates = array();
-                $period = new DatePeriod(
-                    $startDate,
-                    new DateInterval('P1D'),
-                    $endDate
-                );
-
-                foreach ($period as $key => $value) {
-                    $dates[] = Carbon::parse($value);
-                }
-
                 $data[] = [
                     'room' => $room,
                     'price' => $newPrice,
-                    'firstDate' => $dates[0],
+                    'firstDate' => $enableDate,
                 ];
             }
         }
 
-        return response()->json([
-            'data' => RoomResource::collection($data),
-            'meta' => [
-                'total' => $rooms->total(),
-                'per_page' => $rooms->perPage(),
-                'from' => $rooms->firstItem(),
-                'to' => $rooms->lastItem()
-            ]
-        ]);
+        return response()->json(RoomResource::collection($data));
     }
 }

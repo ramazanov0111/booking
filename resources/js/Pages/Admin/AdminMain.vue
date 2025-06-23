@@ -2,10 +2,14 @@
 
 import {onMounted, ref} from "vue";
 import {route} from "ziggy-js";
+import flatPickr from 'vue-flatpickr-component'
+import {Russian} from 'flatpickr/dist/l10n/ru'
 
 const bookings = ref([])
 const rooms = ref([])
-
+const filters = ref({
+    date_range: '',
+})
 const loading = ref(false)
 
 // Загрузка данных
@@ -30,14 +34,15 @@ const loadEnabledRooms = async () => {
         loading.value = true
 
         const params = {
-            start_date: null,
-            end_date: null
+            ...(filters.value.date_range && {
+                start_date: filters.value.date_range.split(" — ")[0],
+                end_date: filters.value.date_range.split(" — ")[1]
+            })
         }
 
         const {data} = await axios.get(route('rooms.enabled'), {params})
 
-
-        rooms.value = data.data
+        rooms.value = data
     } catch (error) {
         console.error('Ошибка загрузки номеров:', error)
     } finally {
@@ -56,6 +61,13 @@ const statuses = ref({
     'canceled': 'Отменено',
 })
 
+// Конфигурация календаря
+const dateConfig = {
+    mode: 'range',
+    dateFormat: 'd-m-Y',
+    locale: Russian
+}
+
 // Инициализация
 onMounted(async () => {
     await loadBookings()
@@ -63,10 +75,6 @@ onMounted(async () => {
 })
 
 </script>
-
-Таблица с текущими постояльцами: номер, фио, период дат
-
-Таблица с доступными для заселения номерами с отбором по периоду (по умолчанию текущий день): номер, актуальная на дату цена, дата ближайшего заселения в этот номер
 
 <template>
     <div class="py-12">
@@ -111,6 +119,18 @@ onMounted(async () => {
             <!-- Заголовок -->
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold">Доступные для заселения номера</h1>
+            </div>
+            <div class="controls">
+                <div class="filters">
+                    <flat-pickr
+                        v-model="filters.date_range"
+                        :config="dateConfig"
+                        placeholder="Выберите период"
+                        class="date-picker"
+                        @on-change="loadEnabledRooms"
+                    />
+                </div>
+
             </div>
             <div class="bg-white rounded-lg shadow overflow-x-auto">
                 <table>
