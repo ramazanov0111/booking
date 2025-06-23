@@ -481,7 +481,6 @@ const formatDate = (dateString) => {
 }
 
 const statuses = ref({
-    'pending': 'В обработке',
     'confirmed': 'Подтверждено',
     'paid': 'Оплачено',
     'canceled': 'Отменено',

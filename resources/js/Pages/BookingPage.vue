@@ -136,7 +136,6 @@ const pluralizeNights = (nights) => {
 
 const statusText = (status) => {
     const statusMap = {
-        'pending': 'В обработке',
         'confirmed': 'Подтверждено',
         'paid': 'Оплачено',
         'canceled': 'Отменено'

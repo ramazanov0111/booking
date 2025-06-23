@@ -13,7 +13,11 @@ const loadBookings = async () => {
     try {
         loading.value = true
 
-        const response = await axios.get(route('booking.index'))
+        const params = {
+            is_not_canceled: true
+        }
+
+        const response = await axios.get(route('booking.index'), {params})
         bookings.value = response.data.data
     } finally {
         loading.value = false
@@ -47,7 +51,6 @@ const formatDate = (dateString) => {
 }
 
 const statuses = ref({
-    'pending': 'В обработке',
     'confirmed': 'Подтверждено',
     'paid': 'Оплачено',
     'canceled': 'Отменено',
@@ -70,17 +73,16 @@ onMounted(async () => {
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Заголовок -->
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Список постояльцев</h1>
+                <h1 class="text-2xl font-bold">Список текущих постояльцев</h1>
             </div>
             <div class="bg-white rounded-lg shadow overflow-x-auto">
                 <table>
                     <thead>
                     <tr>
+                        <th>Номер</th>
                         <th>Пользователь</th>
                         <th>Телефон</th>
-                        <th>Дата заселения</th>
-                        <th>Дата выселения</th>
-                        <th>Статус</th>
+                        <th>Период проживания</th>
                     </tr>
                     </thead>
 
@@ -94,11 +96,10 @@ onMounted(async () => {
 
                     <tbody v-else>
                     <tr v-for="booking in bookings" :key="booking.id">
+                        <td>{{ booking.room.name }}</td>
                         <td>{{ booking.user.name }} {{ booking.user.lastname }}</td>
                         <td>{{ booking.user.phone }}</td>
-                        <td>{{ formatDate(booking.check_in) }}</td>
-                        <td>{{ formatDate(booking.check_out) }}</td>
-                        <td>{{ statuses[booking.status] }}</td>
+                        <td>{{ formatDate(booking.check_in) }} - {{ formatDate(booking.check_out) }}</td>
                     </tr>
                     </tbody>
                 </table>

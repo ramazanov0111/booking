@@ -345,7 +345,7 @@ const handleBooking = async (user) => {
             total_price: totalPrice.value,
             check_in: checkIn.value,
             check_out: checkOut.value,
-            status: 'pending',
+            status: 'confirmed',
             stripe_payment_id: 'qwerty'
         }
 

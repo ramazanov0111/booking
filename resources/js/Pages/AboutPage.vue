@@ -1,5 +1,5 @@
 <template>
-    <SpaLayout title="About">
+    <SpaLayout title="">
     <div class="about-page">
         <!-- Секция с основным описанием -->
         <section class="about-section">
