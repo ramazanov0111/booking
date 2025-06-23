@@ -38,7 +38,7 @@
                         </div>
                         <div>
                             <label>Номер <span class="required">*</span></label>
-                            <select v-model="form.room_id">
+                            <select v-model="form.room_id" @change="getDisabledDatesForRoom">
                                 <option
                                     v-for="room in rooms"
                                     :key="room.id"
@@ -97,7 +97,6 @@
                                     {{ paymentMethod.value }}
                                 </option>
                             </select>
-                            <span v-if="errors.room_id" class="error">{{ errors.room_id }}</span>
                         </div>
                         <div>
                             <label>Цена</label>
@@ -169,7 +168,7 @@ const currentPrice = ref(null)
 const rooms = ref([])
 const users = ref([])
 const isSubmitting = ref(false)
-const disabledDates = ref([])
+const disabledDates = ref(null)
 const booking = ref([])
 
 function totalNights() {
@@ -224,6 +223,7 @@ function totalPrice() {
 }
 
 const loadPrice = async () => {
+    console.log(1, form.value.room_id)
     try {
         const params = {
             roomId: form.value.room_id,
@@ -237,10 +237,10 @@ const loadPrice = async () => {
             if (response.data.price) {
                 currentPrice.value = parseFloat(response.data.price);
             } else {
-                currentPrice.value = booking.value.room.base_price
+                currentPrice.value = rooms[form.value.room_id].base_price
             }
         } else {
-            currentPrice.value = booking.value.room.base_price
+            currentPrice.value = rooms[form.value.room_id].base_price
         }
     } catch (error) {
         console.error('Ошибка загрузки цены:', error)
@@ -301,6 +301,7 @@ const handleSubmit = async () => {
             total_price: totalPrice(),
             check_in: checkInDate.value,
             check_out: checkOutDate.value,
+            stripe_payment_id: 'qwerty'
         }
 
         const url = isEditMode.value
@@ -325,22 +326,24 @@ const handleSubmit = async () => {
 }
 
 const getDisabledDatesForRoom = async () =>  {
-    try {
-        const response1 = await axios.get(route('blocked_dates.by_room', form.value.room_id))
-        const response2 = await axios.get(route('booking_dates.by_room', form.value.room_id))
+    if (form.value.room_id) {
+        try {
+            const response1 = await axios.get(route('blocked_dates.by_room', form.value.room_id))
+            const response2 = await axios.get(route('booking_dates.by_room', form.value.room_id))
 
-        disabledDates.value = [...response1.data, ...response2.data]
+            disabledDates.value = [...response1.data, ...response2.data]
 
-    } catch (error) {
-        console.error('Ошибка загрузки дат:', error)
+        } catch (error) {
+            console.error('Ошибка загрузки дат:', error)
+        }
     }
 }
 
 
 // Валидация при изменении дат
-watch([form.value.checkIn, form.value.checkOut], () => {
-    if (form.value.checkOut && form.value.checkIn && form.value.checkOut <= form.value.checkIn) {
-        form.value.checkOut = null
+watch([checkInDate, checkOutDate], () => {
+    if (checkOutDate.value && checkInDate.value && checkOutDate.value <= checkInDate.value) {
+        checkOutDate.value = null
     }
     loadPrice()
 })
@@ -348,7 +351,7 @@ watch([form.value.checkIn, form.value.checkOut], () => {
 // Инициализация
 onMounted(async () => {
     await loadInitialData()
-    await loadPrice()
+    // await loadPrice()
     await loadUsers()
     await loadRooms()
     await getDisabledDatesForRoom()

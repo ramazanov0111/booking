@@ -55,7 +55,10 @@
                             </option>
                         </select>
                     </div>
-
+                    <Link :href="route('booking.create')"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        + Новое бронирование
+                    </Link>
                 </div>
 
                 <!-- Таблица цен -->
@@ -178,6 +181,7 @@ const filters = ref({
     date_range: '',
     status: ''
 })
+const disabledDates = ref(null)
 
 const statuses = ref({
     'confirmed': 'Подтверждено',
@@ -224,6 +228,17 @@ const loadData = async () => {
         meta.value = {...rest}
     } finally {
         loading.value = false
+    }
+}
+
+const getDisabledDatesForRoom = async () =>  {
+    try {
+        const response1 = await axios.get(route('blocked_dates.by_room', roomId))
+        const response2 = await axios.get(route('booking_dates.by_room', roomId))
+
+        disabledDates.value = [...response1.data, ...response2.data]
+    } catch (error) {
+        console.error('Ошибка загрузки дат:', error)
     }
 }
 
