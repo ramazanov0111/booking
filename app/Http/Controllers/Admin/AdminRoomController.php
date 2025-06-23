@@ -184,15 +184,16 @@ class AdminRoomController extends Controller
             }
 
             foreach ($room->bookings->all() as $bookingDate) {
-                if ($bookingDate->status !== 'canceled')
-                $period = new DatePeriod(
-                    $bookingDate->check_in,
-                    new DateInterval('P1D'),
-                    new Carbon(strtotime($bookingDate->check_out . ' +1 days'))
-                );
+                if ($bookingDate->status !== 'canceled') {
+                    $period = new DatePeriod(
+                        $bookingDate->check_in,
+                        new DateInterval('P1D'),
+                        new Carbon(strtotime($bookingDate->check_out . ' +1 days'))
+                    );
 
-                foreach ($period as $key => $value) {
-                    $dates[] = Carbon::parse($value)->format('d-m-Y');
+                    foreach ($period as $key => $value) {
+                        $dates[] = Carbon::parse($value)->format('d-m-Y');
+                    }
                 }
             }
 
