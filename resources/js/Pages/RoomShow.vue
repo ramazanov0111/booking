@@ -2,21 +2,21 @@
     <SpaLayout title="{{roomCur.name}}">
         <div class="container mx-auto px-4 py-8 max-w-6xl">
 
-            <!--             Галерея номера-->
-            <!--                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">-->
-            <!--                                <div class="md:col-span-2">-->
-            <!--                                    <img :src="room.images[0]" alt="Основное фото" class="w-full h-96 object-cover rounded-lg shadow-md">-->
-            <!--                                </div>-->
-            <!--                                <div class="grid grid-cols-2 gap-4">-->
-            <!--                                    <img-->
-            <!--                                        v-for="(img, index) in room.images.slice(1, 5)"-->
-            <!--                                        :key="index"-->
-            <!--                                        :src="img"-->
-            <!--                                        :alt="'Фото номера ' + (index + 2)"-->
-            <!--                                        class="w-full h-48 object-cover rounded-lg shadow-md"-->
-            <!--                                    >-->
-            <!--                                </div>-->
-            <!--                            </div>-->
+<!--                         Галерея номера-->
+<!--                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">-->
+<!--                                            <div class="md:col-span-2">-->
+<!--                                                <img :src="roomCur.imageUrl" alt="Основное фото" class="w-full h-96 object-cover rounded-lg shadow-md">-->
+<!--                                            </div>-->
+<!--                                            <div class="grid grid-cols-2 gap-4">-->
+<!--                                                <img-->
+<!--                                                    v-for="(img, index) in roomCur.gallery"-->
+<!--                                                    :key="index"-->
+<!--                                                    :src="img"-->
+<!--                                                    :alt="'Фото номера ' + (index + 1)"-->
+<!--                                                    class="w-full h-48 object-cover rounded-lg shadow-md"-->
+<!--                                                >-->
+<!--                                            </div>-->
+<!--                                        </div>-->
 
             <!-- Основная информация -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -25,12 +25,14 @@
                     <div class="grid grid-cols-2 md:grid-cols-1 gap-4 mb-8">
                         <div class="md:col-span-3">
                             <img :src="roomCur.imageUrl" alt="Основное фото"
-                                 class="w-full h-96 object-cover rounded-lg shadow-md">
+                                 class="w-full h-96 object-cover rounded-lg shadow-md"
+                                 @click="openLightbox(0)">
                         </div>
                         <div class="previews grid grid-cols-1 md:grid-cols-5 gap-2">
-                            <div v-for="item in roomCur.gallery" class="gallery-item">
+                            <div v-for="(item, index) in roomCur.gallery" class="gallery-item">
                                 <img :src="item.imageUrl" :alt="item.imageUrl"
-                                     class="preview-image rounded-lg">
+                                     class="preview-image rounded-lg"
+                                     @click="openLightbox(index+1)">
                             </div>
                         </div>
                     </div>
@@ -59,13 +61,13 @@
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-semibold">Отзывы ({{ reviews.length }})</h2>
-<!--                            <button-->
-<!--                                v-if="$page.props.auth.user"-->
-<!--                                @click="showReviewForm = true"-->
-<!--                                class="text-blue-600 hover:text-blue-800 font-medium"-->
-<!--                            >-->
-<!--                                Написать отзыв-->
-<!--                            </button>-->
+                            <!--                            <button-->
+                            <!--                                v-if="$page.props.auth.user"-->
+                            <!--                                @click="showReviewForm = true"-->
+                            <!--                                class="text-blue-600 hover:text-blue-800 font-medium"-->
+                            <!--                            >-->
+                            <!--                                Написать отзыв-->
+                            <!--                            </button>-->
                         </div>
 
                         <!-- Форма отзыва -->
@@ -224,6 +226,17 @@
                     </div>
                 </div>
             </div>
+            <!-- Модальное окно для просмотра фотографий -->
+            <Lightbox
+                v-if="lightboxVisible"
+                :images="[
+                    {
+                        imageUrl: roomCur.imageUrl,
+                    },
+                 ...roomCur.gallery]"
+                :initial-index="currentImageIndex"
+                @close="closeLightbox"
+            />
         </div>
     </SpaLayout>
 </template>
@@ -234,6 +247,7 @@ import SpaLayout from "@/Layouts/SpaLayout.vue";
 import {route} from "ziggy-js";
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
+import Lightbox from '@/Components/Lightbox.vue';
 
 const disabledDates = ref(null)
 const currentPrice = ref(null)
@@ -405,6 +419,22 @@ const formatPrice = (price) => {
         currency: 'RUB',
         maximumFractionDigits: 0
     }).format(price)
+}
+
+const lightboxVisible = ref(false);
+const currentImageIndex = ref(0);
+
+function openLightbox(index) {
+    currentImageIndex.value = index;
+    lightboxVisible.value = true;
+    // Блокируем прокрутку страницы
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    lightboxVisible.value = false;
+    // Восстанавливаем прокрутку
+    document.body.style.overflow = '';
 }
 
 // Валидация при изменении дат

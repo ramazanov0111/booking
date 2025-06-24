@@ -53,7 +53,7 @@ const logout = () => {
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex items-center">
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
+                                    Дашборд
                                 </NavLink>
                                 <NavLink :href="route('users.list')" :active="route().current('users.list')">
                                     Пользователи
@@ -172,7 +172,7 @@ const logout = () => {
                                 Профиль
                             </DropdownLink>
                             <DropdownLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                Dashboard
+                                Дашборд
                             </DropdownLink>
                             <DropdownLink :href="route('users.list')" :active="route().current('users.list')">
                                 Пользователи

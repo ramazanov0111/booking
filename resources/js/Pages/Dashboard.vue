@@ -4,10 +4,10 @@ import AdminMain from "@/Pages/Admin/AdminMain.vue";
 </script>
 
 <template>
-    <AppLayout title="Dashboard">
+    <AppLayout title="Дашборд">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Dashboard
+                Дашборд
             </h2>
         </template>
 
