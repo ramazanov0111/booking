@@ -33,11 +33,13 @@
                     <div class="flex flex-col md:flex-row">
                         <!-- Изображение отеля -->
                         <div class="md:w-1/4">
-                            <img
-                                :src="booking.room.imageUrl"
-                                :alt="booking.room.name"
-                                class="w-full h-48 md:h-full object-cover"
-                            >
+                            <Link :href="route('room.show', booking.room.id)" class="md:w-1/4">
+                                <img
+                                    :src="booking.room.imageUrl"
+                                    :alt="booking.room.name"
+                                    class="w-full h-48 md:h-full object-cover"
+                                >
+                            </Link>
                         </div>
 
                         <!-- Информация о бронировании -->
@@ -53,11 +55,12 @@
                                 >
                                     {{ statusText(booking.status) }}
                                 </div>
+
                             </div>
 
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
-                                    <p class="text-sm text-gray-500">Даты проживания</p>
+                                    <p class="text-sm text-gray-500">Даты проживания:</p>
                                     <p class="font-medium">
                                         {{ formatDate(booking.check_in) }} - {{ formatDate(booking.check_out) }}
                                     </p>
@@ -67,8 +70,8 @@
                                 </div>
 
                                 <div>
-                                    <p class="text-sm text-gray-500">Стоимость</p>
-                                    <p class="font-medium text-lg">{{ formatPrice(booking.total_price) }} ₽</p>
+                                    <p class="text-sm text-gray-500">Стоимость: <span class="font-medium text-lg  text-black">{{ formatPrice(booking.total_price) }} ₽</span></p>
+                                    <p class="text-sm text-gray-500">Способ оплаты: <span class="font-medium text-lg  text-black">{{ paymentMethods[booking.payment_method] }}</span></p>
                                 </div>
                             </div>
 
@@ -96,6 +99,7 @@
 import SpaLayout from "@/Layouts/SpaLayout.vue";
 import {ref, onMounted} from 'vue'
 import {route} from "ziggy-js";
+import {Link} from "@inertiajs/vue3";
 
 const props = defineProps({
     userId: Object,
@@ -103,6 +107,11 @@ const props = defineProps({
 
 // Данные бронирований (в реальном приложении загружаются с сервера)
 const bookings = ref([])
+
+const paymentMethods = ref({
+    'online': 'Онлайн',
+    'on_site': 'На месте'
+})
 
 // Загрузка данных
 const loadData = async () => {
