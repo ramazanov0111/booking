@@ -117,6 +117,8 @@ const props = defineProps({
         default: true,
     },
     user: Object,
+    checkIn: '',
+    checkOut: '',
 })
 
 const emit = defineEmits(['close', 'booking-success'])
@@ -131,14 +133,14 @@ const currentPrice = ref(null)
 const errors = ref({})
 
 const paymentMethods = [
-    { key: 'online', value: 'Онлайн' },
-    { key: 'on_site', value: 'На месте' }
+    {key: 'online', value: 'Онлайн'},
+    {key: 'on_site', value: 'На месте'}
 ];
 
 const statusList = [
-    { key: 'confirmed', value: 'Подтверждено' },
-    { key: 'paid', value: 'Оплачено' },
-    { key: 'canceled', value: 'Отменено' }
+    {key: 'confirmed', value: 'Подтверждено'},
+    {key: 'paid', value: 'Оплачено'},
+    {key: 'canceled', value: 'Отменено'}
 ];
 
 const isFormValid = computed(() =>
@@ -171,6 +173,8 @@ const loadPrice = async () => {
 
             if (response.data.price) {
                 currentPrice.value = response.data.price
+            } else {
+                currentPrice.value = props.room.base_price
             }
         } else {
             currentPrice.value = props.room.base_price
@@ -181,7 +185,7 @@ const loadPrice = async () => {
     }
 }
 
-const getDisabledDatesForRoom = async () =>  {
+const getDisabledDatesForRoom = async () => {
     if (props.show) {
         try {
             const response1 = await axios.get(route('blocked_dates.by_room', props.room?.id))
@@ -192,8 +196,17 @@ const getDisabledDatesForRoom = async () =>  {
         } catch (error) {
             console.error('Ошибка загрузки дат:', error)
         }
+        await loadDates();
     }
 }
+
+const loadDates = async () => {
+    if (props.checkIn && props.checkOut) {
+        checkInDate.value = props.checkIn
+        checkOutDate.value = props.checkOut
+    }
+}
+
 
 // Методы
 const closeModal = () => {
@@ -262,7 +275,7 @@ watch([checkInDate, checkOutDate], () => {
 
 // Инициализация
 onMounted(async () => {
-    // await loadPrice()
+    // await loadDates()
     await getDisabledDatesForRoom()
     const now = new Date();
     const msUntilMidnight = new Date(now).setHours(24, 0, 0, 0) - now;

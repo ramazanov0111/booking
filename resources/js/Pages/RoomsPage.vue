@@ -174,6 +174,8 @@
                 :show="selectedRoom"
                 :room="selectedRoom"
                 :user="$page.props.auth.user"
+                :checkIn="checkIn"
+                :checkOut="checkOut"
 
                 @close="selectedRoom = null"
             />
@@ -209,6 +211,8 @@ const loading = ref(false)
 const error = ref(null)
 const errors = ref({})
 const selectedRoom = ref(null)
+const checkIn = ref(null)
+const checkOut = ref(null)
 
 const guestsParams = ref({
     min: 1,
@@ -294,6 +298,8 @@ const renderStars = (rating) => {
 const openModal = (room, user) => {
     if (user) {
         selectedRoom.value = room
+        checkIn.value = filters.value.checkIn
+        checkOut.value = filters.value.checkOut
     } else {
         window.location.href = route('login')
     }
