@@ -85,7 +85,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="booking in bookings" :key="booking.id">
+                        <tr v-for="booking in bookings" :key="booking.id" @click="handleRowClick(booking)">
 
                             <td>{{ booking.user.name }} {{ booking.user.lastname }}</td>
 
@@ -291,6 +291,14 @@ const deleteBooking = async (booking) => {
     } catch (error) {
         console.error('Ошибка удаления:', error)
     }
+}
+
+const handleRowClick = async (booking) => {
+    // Переход с помощью Vue Router
+    // route('users.edit', user);
+
+    // Или обычная переадресация
+    window.location.href = route('booking.edit', booking.id);
 }
 
 // Форматирование даты

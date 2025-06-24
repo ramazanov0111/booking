@@ -64,7 +64,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="blocked_date in blocked_dates" :key="blocked_date.id">
+                        <tr v-for="blocked_date in blocked_dates" :key="blocked_date.id" @click="handleRowClick(blocked_date)">
                             <td>{{ blocked_date.room.name }}</td>
 
                             <td>{{ formatDate(blocked_date.date_start) }} - {{ formatDate(blocked_date.date_end) }}</td>
@@ -184,6 +184,14 @@ const deletePeriod = async (blocked_date) => {
     } catch (error) {
         console.error('Ошибка удаления:', error)
     }
+}
+
+const handleRowClick = async (blocked_date) => {
+    // Переход с помощью Vue Router
+    // route('users.edit', user);
+
+    // Или обычная переадресация
+    window.location.href = route('blocked_dates.edit', blocked_date.id);
 }
 
 // Форматирование даты

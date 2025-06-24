@@ -44,7 +44,7 @@
                         </tr>
 
                         <!-- Список номеров -->
-                        <tr v-for="user in users" :key="user.id">
+                        <tr v-for="user in users" :key="user.id" @click="handleRowClick(user)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ user.name }}</div>
                             </td>
@@ -103,7 +103,7 @@
 
 <script setup>
 import {ref, onMounted} from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import {Link, router, useForm} from '@inertiajs/vue3';
 import AppLayout from "@/Layouts/AppLayout.vue";
 
 const users = ref([])
@@ -138,6 +138,14 @@ const deleteUser = async (id) => {
             console.error('Ошибка удаления:', error)
         }
     }
+}
+
+const handleRowClick = async (user) => {
+    // Переход с помощью Vue Router
+    // route('users.edit', user);
+
+    // Или обычная переадресация
+    window.location.href = route('users.edit', user.id);
 }
 
 // Смена страницы

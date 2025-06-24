@@ -86,7 +86,7 @@
                         </tr>
 
                         <!-- Список номеров -->
-                        <tr v-for="room in rooms" :key="room.id">
+                        <tr v-for="room in rooms" :key="room.id" @click="handleRowClick(room)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ room.name }}</div>
                                 <div class="text-gray-500 text-sm mt-1">{{ room.description }}</div>
@@ -206,6 +206,14 @@ const deleteRoom = async (id) => {
             console.error('Ошибка удаления:', error)
         }
     }
+}
+
+const handleRowClick = async (room) => {
+    // Переход с помощью Vue Router
+    // route('users.edit', user);
+
+    // Или обычная переадресация
+    window.location.href = route('rooms.edit', room.id);
 }
 
 // Форматирование цены

@@ -65,7 +65,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="price in prices" :key="price.id">
+                        <tr v-for="price in prices" :key="price.id" @click="handleRowClick(price)">
                             <td>{{ price.room.name }}</td>
 
                             <td>{{ price.room.base_price }}</td>
@@ -187,6 +187,14 @@ const deletePrice = async (price) => {
     } catch (error) {
         console.error('Ошибка удаления:', error)
     }
+}
+
+const handleRowClick = async (price) => {
+    // Переход с помощью Vue Router
+    // route('users.edit', user);
+
+    // Или обычная переадресация
+    window.location.href = route('prices.edit', price.id);
 }
 
 // Форматирование даты
