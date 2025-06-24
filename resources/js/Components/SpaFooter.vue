@@ -9,15 +9,15 @@
                     <ul class="space-y-2">
                         <li class="flex items-center">
                             <i class="fas fa-map-marker-alt mr-3 text-blue-400"></i>
-                            г. Санкт-Петербург, ул. Лесная, 15
+                            г. Астрахань, ул. Примерная, д. 10
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-phone mr-3 text-blue-400"></i>
-                            <a href="tel:+78121234567">+7 (812) 123-45-67</a>
+                            <a href="tel:+78121234567">+7 (999) 123-45-67</a>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-envelope mr-3 text-blue-400"></i>
-                            <a href="mailto:info@foresthouse.ru">info@foresthouse.ru</a>
+                            <a href="mailto:info@foresthouse.ru">contact@guesthouse.ru</a>
                         </li>
                     </ul>
                 </div>

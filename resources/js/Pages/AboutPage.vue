@@ -1,57 +1,64 @@
 <template>
     <SpaLayout title="">
-    <div class="about-page">
-        <!-- Секция с основным описанием -->
-        <section class="about-section">
-            <h1 class="title">Добро пожаловать в наш гостевой дом!</h1>
-            <div class="content">
-                <img
-                    src="../../../public/images/dom1.jpg"
-                    alt="Наш гостевой дом"
-                    class="main-image"
-                >
-                <div class="description">
-                    <p>Мы предлагаем уютные номера в самом сердце {{ location }}.</p>
-                    <p>Наш гостевой дом работает с 2010 года и за это время мы приняли более 5000 гостей!</p>
+        <div class="about-page">
+            <!-- Секция с основным описанием -->
+            <section class="about-section">
+                <h1 class="title">Добро пожаловать в наш гостевой дом!</h1>
+                <div class="content">
+                    <img
+                        src="../../../public/images/dom1.jpg"
+                        alt="Наш гостевой дом"
+                        class="main-image"
+                    >
+                    <div class="description">
+                        <p>Мы предлагаем уютные номера в самом сердце {{ location }}.</p>
+                        <p>Наш гостевой дом работает с 2010 года и за это время мы приняли более 5000 гостей!</p>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Контактная информация -->
-        <section class="contacts-section">
-            <h2 class="section-title">Контакты</h2>
-            <div class="contacts-grid">
-                <div class="contact-item">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <p>Адрес: {{ contacts.address }}</p>
+            <!-- Контактная информация -->
+            <section class="contacts-section">
+                <h2 class="section-title">Контакты</h2>
+                <div class="contacts-grid">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Адрес: {{ contacts.address }}</p>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <p>Телефон: {{ contacts.phone }}</p>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <p>Email: {{ contacts.email }}</p>
+                    </div>
                 </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone"></i>
-                    <p>Телефон: {{ contacts.phone }}</p>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <p>Email: {{ contacts.email }}</p>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Карта -->
-        <section class="map-section">
-            <h2 class="section-title">Мы находимся здесь</h2>
-            <div class="map-wrapper">
-                <iframe
-                    :src="mapUrl"
-                    width="100%"
-                    height="450"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                ></iframe>
-            </div>
-        </section>
-    </div>
+            <!-- Карта -->
+            <section class="map-section">
+                <h2 class="section-title">Мы находимся здесь</h2>
+                <div class="map-wrapper">
+                    <!--                    <iframe-->
+                    <!--                        :src="mapUrl"-->
+                    <!--                        width="100%"-->
+                    <!--                        height="450"-->
+                    <!--                        style="border:0;"-->
+                    <!--                        allowfullscreen=""-->
+                    <!--                        loading="lazy"-->
+                    <!--                        referrerpolicy="no-referrer-when-downgrade"-->
+                    <!--                    ></iframe>-->
+                    <!--                    <a href="https://yandex.ru/maps/org/astrakhanskiy_gosudarstvenny_tekhnicheskiy_universitet/1102893439/?utm_medium=mapframe&utm_source=maps"-->
+                    <!--                        style="color:#eee;font-size:12px;position:absolute;top:0px;">Астраханский государственный технический университет</a>-->
+                    <!--                    <a href="https://yandex.ru/maps/37/astrahan/category/university/184106140/?utm_medium=mapframe&utm_source=maps"-->
+                    <!--                    style="color:#eee;font-size:12px;position:absolute;top:14px;">ВУЗ в Астрахани</a>-->
+                    <iframe :src="mapUrl" width="100%" height="450" frameborder="1" allowfullscreen="true"
+                            loading="lazy"
+                            style="position:relative; border:0;" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </section>
+        </div>
     </SpaLayout>
 </template>
 
@@ -62,13 +69,13 @@ export default {
     components: {SpaLayout},
     data() {
         return {
-            location: "Санкт-Петербург",
+            location: "Астрахань",
             contacts: {
                 address: "ул. Примерная, д. 10",
                 phone: "+7 (999) 123-45-67",
                 email: "contact@guesthouse.ru"
             },
-            mapUrl: "https://www.google.com/maps/embed/v1/place?key=API_KEY&q=Санкт-Петербург",
+            mapUrl: "https://yandex.ru/map-widget/v1/?ll=48.057886%2C46.373252&mode=poi&poi%5Bpoint%5D=48.053850%2C46.375430&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D1102893439&z=17.04",
             reviews: [
                 {
                     author: "Иван Петров",
@@ -89,7 +96,7 @@ export default {
     },
     methods: {
         formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const options = {year: 'numeric', month: 'long', day: 'numeric'};
             return new Date(dateString).toLocaleDateString('ru-RU', options);
         },
         async submitFeedback() {
@@ -98,7 +105,7 @@ export default {
                 // Отправка данных на бэкенд
                 await this.$axios.post('/api/feedback', this.feedbackForm);
                 alert('Спасибо за ваш отзыв!');
-                this.feedbackForm = { name: '', email: '', rating: 0, message: '' };
+                this.feedbackForm = {name: '', email: '', rating: 0, message: ''};
             } catch (error) {
                 console.error('Ошибка отправки:', error);
                 alert('Произошла ошибка при отправке формы');
