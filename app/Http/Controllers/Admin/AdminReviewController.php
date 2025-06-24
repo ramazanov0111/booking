@@ -87,9 +87,10 @@ class AdminReviewController extends Controller
         return response()->noContent();
     }
 
-    public function publish(Review $review): Response
+    public function publish(Review $review, Request $request): Response
     {
         $review->published = 1;
+        $review->answer = $request->get('answer');
         $review->save();
         return response()->noContent();
     }

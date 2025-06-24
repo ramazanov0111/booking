@@ -20,7 +20,9 @@ class ReviewResource extends JsonResource
             'room_id' => $this->room_id,
             'rating' => $this->rating,
             'comment' => $this->comment,
+            'answer' => $this->answer,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
             'room' => $roomData,
             'user' => $user
         ];

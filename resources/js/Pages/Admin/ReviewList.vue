@@ -57,6 +57,7 @@
                             <th>Номер</th>
                             <th>Оценка</th>
                             <th>Комментарий</th>
+                            <th>Ответ</th>
                             <th>Статус</th>
                             <th>Действия</th>
                         </tr>
@@ -81,11 +82,15 @@
 
                             <td>{{ review.comment }}</td>
 
+                            <td>
+                                <textarea :style="'border:' + (review.published ? 0 : '1px solid #eee') + ';'" :disabled="review.published" v-model="review.answer"></textarea>
+                            </td>
+
                             <td>{{ getStatusPublish(review.published) }}</td>
 
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
                                 <button v-if="!review.published"
-                                    @click="publishReview(review.id)"
+                                    @click="publishReview(review)"
                                     class="text-blue-600 hover:text-blue-900"
                                 >
                                     <i class="fas fa-share-square"></i>
@@ -215,13 +220,32 @@ const deleteReview = async (review) => {
 
 // Публикация отзыва
 const publishReview = async (review) => {
+    if (!validateForm(review.answer)) return alert(errors.value.answer);
+
     if (!confirm('Опубликовать этот отзыв?')) return
     try {
-        await axios.patch(route('review.publish', review))
+        await axios.patch(route('review.publish', review.id), {answer: review.answer})
         await loadData()
     } catch (error) {
         console.error('Ошибка публикации:', error)
     }
+}
+
+// Ошибки валидации
+const errors = ref({
+    answer: '',
+})
+// Валидация формы
+const validateForm = (answer) => {
+    let isValid = true
+    errors.value = {answer: ''}
+
+    if (!answer) {
+        errors.value.answer = 'Заполните ответ!'
+        isValid = false
+    }
+
+    return isValid
 }
 
 // Форматирование даты
@@ -294,6 +318,11 @@ select {
     display: flex;
     gap: 1rem;
     flex-grow: 1;
+}
+
+textarea {
+    border: 1px solid #eee;
+    border-radius: 3px;
 }
 
 table {

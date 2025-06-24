@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Review extends Model
 {
-    protected $fillable = ['user_id', 'room_id', 'rating', 'comment', 'published', 'deleted'];
+    protected $fillable = ['user_id', 'room_id', 'rating', 'comment', 'answer', 'published', 'deleted'];
 
     protected $casts = [
         'rating' => 'integer',
         'comment' => 'string',
+        'answer' => 'string',
         'published' => 'boolean',
         'deleted' => 'boolean'
     ];

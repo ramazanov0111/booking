@@ -2,21 +2,21 @@
     <SpaLayout title="{{roomCur.name}}">
         <div class="container mx-auto px-4 py-8 max-w-6xl">
 
-<!--                         Галерея номера-->
-<!--                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">-->
-<!--                                            <div class="md:col-span-2">-->
-<!--                                                <img :src="roomCur.imageUrl" alt="Основное фото" class="w-full h-96 object-cover rounded-lg shadow-md">-->
-<!--                                            </div>-->
-<!--                                            <div class="grid grid-cols-2 gap-4">-->
-<!--                                                <img-->
-<!--                                                    v-for="(img, index) in roomCur.gallery"-->
-<!--                                                    :key="index"-->
-<!--                                                    :src="img"-->
-<!--                                                    :alt="'Фото номера ' + (index + 1)"-->
-<!--                                                    class="w-full h-48 object-cover rounded-lg shadow-md"-->
-<!--                                                >-->
-<!--                                            </div>-->
-<!--                                        </div>-->
+            <!--                         Галерея номера-->
+            <!--                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">-->
+            <!--                                            <div class="md:col-span-2">-->
+            <!--                                                <img :src="roomCur.imageUrl" alt="Основное фото" class="w-full h-96 object-cover rounded-lg shadow-md">-->
+            <!--                                            </div>-->
+            <!--                                            <div class="grid grid-cols-2 gap-4">-->
+            <!--                                                <img-->
+            <!--                                                    v-for="(img, index) in roomCur.gallery"-->
+            <!--                                                    :key="index"-->
+            <!--                                                    :src="img"-->
+            <!--                                                    :alt="'Фото номера ' + (index + 1)"-->
+            <!--                                                    class="w-full h-48 object-cover rounded-lg shadow-md"-->
+            <!--                                                >-->
+            <!--                                            </div>-->
+            <!--                                        </div>-->
 
             <!-- Основная информация -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -131,10 +131,7 @@
                                         <i class="fas fa-star"
                                            v-for="star in 5"
                                            :key="star"
-                                           :class="[
-                      'h-5 w-5',
-                      star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                    ]"
+                                           :class="['h-5 w-5', star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300']"
                                         />
                                     </div>
                                 </div>
@@ -142,6 +139,10 @@
                                         formatDate(review.created_at)
                                     }}</p>
                                 <p class="text-gray-700">{{ review.comment }}</p>
+                                <p style="text-align: right;" class="text-gray-600 mt-3 mb-2">Администратор • {{
+                                        formatDate(review.updated_at)
+                                    }}</p>
+                                <p style="text-align: right;" class="text-gray-700">{{ review.answer }}</p>
                             </div>
                         </div>
                         <div v-else class="text-center py-8 text-gray-500">
