@@ -80,16 +80,79 @@
                                 <button
                                     v-if="booking.status !== 'canceled'"
                                     @click="cancelBooking(booking)"
-                                    class="px-4 py-2 border border-red-300 rounded-lg text-red-700 hover:bg-red-50 flex items-center"
+                                    class="px-4 py-2 border border-red-700 rounded-lg text-red-700 hover:bg-red-50 flex items-center"
                                 >
                                     <i class="fas fa-xmark-circle h-5 w-5 mr-2"></i>
                                     <span>Отменить</span>
                                 </button>
 
+                                <button
+                                    v-if="isGuest(booking)"
+                                    @click="showReviewForm = true"
+                                    class="px-4 py-2 border border-blue-700 rounded-lg text-blue-700 hover:bg-blue-50 flex items-center"
+                                >
+                                    <i class="fas fa-pencil h-5 w-5 mr-2"></i>
+                                    <span>Написать отзыв</span>
+                                </button>
+
                             </div>
                         </div>
                     </div>
+
+                    <!-- Форма отзыва -->
+                    <div v-if="showReviewForm" class="bg-gray-50 p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Оставьте ваш отзыв</h3>
+                        <form @submit.prevent="submitReview($page.props.auth.user, booking.room.id)">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Оценка</label>
+                                <div class="flex">
+                                    <button
+                                        v-for="star in 5"
+                                        :key="star"
+                                        type="button"
+                                        @click="newReview.rating = star"
+                                        class="mr-2 focus:outline-none"
+                                    >
+
+                                        <i class="fas fa-star"
+                                           :class="[ 'h-6 w-6', star <= newReview.rating ? 'text-yellow-400 fill-current' : 'text-gray-300']"
+                                        ></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="review-text" class="block text-gray-700 mb-2">Комментарий</label>
+                                <textarea
+                                    id="review-text"
+                                    v-model="newReview.text"
+                                    rows="4"
+                                    class="w-full px-3 py-2 border rounded-md"
+                                    placeholder="Поделитесь вашими впечатлениями..."
+                                ></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <button
+                                    type="button"
+                                    @click="showReviewForm = false"
+                                    class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                                >
+                                    Отмена
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                    :disabled="isSubmittingReview"
+                                >
+                                    <span v-if="isSubmittingReview">Отправка...</span>
+                                    <span v-else>Отправить отзыв</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
+
             </div>
         </div>
     </SpaLayout>
@@ -112,6 +175,12 @@ const paymentMethods = ref({
     'online': 'Онлайн',
     'on_site': 'На месте'
 })
+const showReviewForm = ref(false)
+const isSubmittingReview = ref(false)
+const newReview = ref({
+    rating: 5,
+    text: ''
+})
 
 // Загрузка данных
 const loadData = async () => {
@@ -121,6 +190,38 @@ const loadData = async () => {
         bookings.value = response.data
     } catch (e) {
         e.value = 'Не удалось загрузить бронирования. Попробуйте позже.'
+    }
+}
+
+// Форматирование данных
+const isGuest = (booking) => {
+    return booking.status !== 'canceled' && formatDate(booking.check_in) <= formatDate(new Date())
+}
+
+const submitReview = async (user, roomId) => {
+    isSubmittingReview.value = true
+
+    try {
+        const payload = {
+            user_id: user.id,
+            room_id: roomId,
+            rating: newReview.value.rating,
+            comment: newReview.value.text,
+        }
+
+        await axios.post(route('reviews.store'), payload)
+        alert('Спасибо за ваш отзыв!');
+
+        // Сброс формы
+        newReview.value = {
+            rating: 5,
+            text: ''
+        }
+        showReviewForm.value = false
+        isSubmittingReview.value = false
+
+    } catch (error) {
+        console.error('Ошибка добавления отзыва:', error)
     }
 }
 

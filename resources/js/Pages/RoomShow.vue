@@ -38,7 +38,7 @@
                         <h1 class="text-3xl font-bold">{{ roomCur.name }}</h1>
                         <div class="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                             <i class="fas fa-star h-5 w-5 mr-1"></i>
-                            <span class="font-semibold">{{ roomCur.rating }}</span>
+                            <span class="font-semibold">{{ Number(roomCur.rating).toFixed(1) }}</span>
                         </div>
                     </div>
 
@@ -59,13 +59,13 @@
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-semibold">Отзывы ({{ reviews.length }})</h2>
-                            <button
-                                v-if="$page.props.auth.user"
-                                @click="showReviewForm = true"
-                                class="text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                                Написать отзыв
-                            </button>
+<!--                            <button-->
+<!--                                v-if="$page.props.auth.user"-->
+<!--                                @click="showReviewForm = true"-->
+<!--                                class="text-blue-600 hover:text-blue-800 font-medium"-->
+<!--                            >-->
+<!--                                Написать отзыв-->
+<!--                            </button>-->
                         </div>
 
                         <!-- Форма отзыва -->
@@ -187,7 +187,8 @@
                                 </div>
 
                                 <div class="input-group">
-                                    <label class="block text-gray-700 mb-2">Способ оплаты <span class="required">*</span></label>
+                                    <label class="block text-gray-700 mb-2">Способ оплаты <span
+                                        class="required">*</span></label>
                                     <select v-model="paymentMethod" required>
                                         <option
                                             v-for="item in paymentMethods"
@@ -257,8 +258,8 @@ const paymentMethod = ref([])
 const checkIn = ref(null)
 const checkOut = ref(null)
 const paymentMethods = [
-    { key: 'online', value: 'Онлайн' },
-    { key: 'on_site', value: 'На месте' }
+    {key: 'online', value: 'Онлайн'},
+    {key: 'on_site', value: 'На месте'}
 ];
 
 // Отзывы
@@ -317,7 +318,7 @@ const loadPrice = async () => {
     }
 }
 
-const getDisabledDatesForRoom = async () =>  {
+const getDisabledDatesForRoom = async () => {
     try {
         const response1 = await axios.get(route('blocked_dates.by_room', roomId))
         const response2 = await axios.get(route('booking_dates.by_room', roomId))
