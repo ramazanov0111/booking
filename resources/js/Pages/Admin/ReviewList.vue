@@ -50,7 +50,7 @@
 
                 <!-- Таблица цен -->
                 <div class="bg-white rounded-lg shadow overflow-x-auto">
-                    <table>
+                    <table class="auto-height-table">
                         <thead>
                         <tr>
                             <th>Пользователь</th>
@@ -248,6 +248,19 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+.auto-height-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.auto-height-table td {
+    //border: 1px solid #ddd;
+    padding: 8px;
+    word-wrap: break-word; /* Перенос длинных слов */
+    white-space: normal; /* Разрешить перенос строк */
+    overflow-wrap: break-word; /* Современный аналог word-wrap */
+}
 
 label {
     display: block;
