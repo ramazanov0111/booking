@@ -15,18 +15,11 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import SpaHeader from '@/Components/SpaHeader.vue'
 import SpaFooter from '@/Components/SpaFooter.vue'
 import 'flatpickr/dist/flatpickr.min.css';
 
-export default {
-    name: 'SpaLayout',
-    components: {
-        SpaHeader,
-        SpaFooter
-    }
-}
 </script>
 
 <style>

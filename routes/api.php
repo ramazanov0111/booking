@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminBlockedDateController;
+use App\Http\Controllers\Admin\AdminConfigController;
 use App\Http\Controllers\Admin\AdminPriceController;
 use App\Http\Controllers\Admin\AdminRoomController;
 use App\Http\Controllers\Admin\AdminBookingController;
@@ -20,6 +21,7 @@ Route::prefix('proger')->group(function (){
     Route::apiResource('booking', AdminBookingController::class);
     Route::apiResource('reviews', AdminReviewController::class);
     Route::apiResource('blocked_dates', AdminBlockedDateController::class);
+    Route::apiResource('configs', AdminConfigController::class);
 
     Route::get('actual_price', [AdminPriceController::class, 'actualPrice']);
 
@@ -45,3 +47,5 @@ Route::get('/bookings/{room}', [SpaBaseController::class, 'getBookingDatesByRoom
 Route::get('/bookings', [SpaBaseController::class, 'getBookingsForUser'])->name('bookings');
 Route::patch('/cancel/{booking}', [SpaBaseController::class, 'cancelBooking'])->name('booking.cancel');
 Route::get('/reviews', [SpaBaseController::class, 'getReviews'])->name('reviews');
+Route::get('amenities', [SpaBaseController::class, 'getAmenities'])->name('amenities');
+Route::get('contacts', [SpaBaseController::class, 'getContacts'])->name('contacts');

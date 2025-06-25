@@ -139,10 +139,10 @@
                                         formatDate(review.created_at)
                                     }}</p>
                                 <p class="text-gray-700">{{ review.comment }}</p>
-                                <p style="text-align: right;" class="text-gray-600 mt-3 mb-2">Администратор • {{
+                                <p v-if="review.answer" style="text-align: right;" class="text-gray-600 mt-3 mb-2">Администратор • {{
                                         formatDate(review.updated_at)
                                     }}</p>
-                                <p style="text-align: right;" class="text-gray-700">{{ review.answer }}</p>
+                                <p v-if="review.answer" style="text-align: right;" class="text-gray-700">{{ review.answer }}</p>
                             </div>
                         </div>
                         <div v-else class="text-center py-8 text-gray-500">

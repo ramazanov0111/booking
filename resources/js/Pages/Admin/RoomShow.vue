@@ -144,7 +144,7 @@
                         <label class="block text-gray-700 mb-2">Удобства <span class="required">*</span></label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                             <label
-                                v-for="amenity in amenitiesList"
+                                v-for="amenity in (amenities ?? amenitiesList)"
                                 :key="amenity"
                                 class="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50"
                             >
@@ -344,8 +344,7 @@ const amenitiesList = ref([
     'Фен',
     'Тапочки'
 ])
-
-
+const amenities = ref([])
 const previewImage = ref('');
 const file = ref(null);
 const galleryFiles = ref([]);
@@ -475,6 +474,18 @@ const validateForm = () => {
     return isValid
 }
 
+const loadAmenities = async () => {
+    try {
+        const response = await axios.get(route('amenities'))
+
+        amenities.value = response.data.value
+    } catch (e) {
+        error.value = 'Не удалось загрузить. Попробуйте позже.'
+    } finally {
+        loading.value = false
+    }
+}
+
 // Форматирование даты
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ru-RU')
@@ -561,10 +572,11 @@ const handleSubmit = async () => {
 }
 
 // Инициализация
-onMounted(() => {
+onMounted(async () => {
     if (isEditMode.value) {
-        loadRoomData()
+        await loadRoomData()
     }
+    await loadAmenities()
 })
 
 // Очищаем ресурсы при уничтожении компонента

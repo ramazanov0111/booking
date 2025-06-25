@@ -9,15 +9,15 @@
                     <ul class="space-y-2">
                         <li class="flex items-center">
                             <i class="fas fa-map-marker-alt mr-3 text-blue-400"></i>
-                            г. Астрахань, ул. Примерная, д. 10
+                            г. {{ contacts.location }}, {{ contacts.address }}
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-phone mr-3 text-blue-400"></i>
-                            <a href="tel:+78121234567">+7 (999) 123-45-67</a>
+                            <a href="tel:{{ contacts.phone }}">{{ contacts.phone }}</a>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-envelope mr-3 text-blue-400"></i>
-                            <a href="mailto:info@foresthouse.ru">contact@guesthouse.ru</a>
+                            <a href="mailto:{{ contacts.email }}">{{ contacts.email }}</a>
                         </li>
                     </ul>
                 </div>
@@ -89,41 +89,38 @@
     </footer>
 </template>
 
-<script>
+<script setup>
 
-import { Head, Link, router } from '@inertiajs/vue3';
 import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-export default {
-    name: 'SpaFooter',
-    components: {
-        Link,
-        NavLink,
-        ResponsiveNavLink
-    },
-    data() {
-        return {
-            email: '',
-            navItems: [
-                { title: 'Главная', path: '/' },
-                { title: 'Номера', path: '/rooms' },
-                { title: 'Мои бронирования', path: '/booking' }
-            ],
-            socials: [
-                { name: 'VK', icon: 'fab fa-vk', link: '#' },
-                { name: 'Telegram', icon: 'fab fa-telegram-plane', link: '#' },
-                { name: 'Instagram', icon: 'fab fa-instagram', link: '#' }
-            ]
+import {onMounted, ref} from "vue";
+import {route} from "ziggy-js";
+
+const loading = ref(true)
+const contacts = ref([])
+
+const loadContacts = async () => {
+    try {
+        loading.value = true
+
+        const {data} = await axios.get(route('contacts'))
+
+        contacts.value = {
+            address: data.find(contact => contact.key === 'Адрес')?.value ?? "ул. Примерная, д. 11",
+            phone: data.find(contact => contact.key === 'Телефон')?.value ?? "+7 (999) 123-45-67",
+            email: data.find(contact => contact.key === 'Email')?.value ?? "contact@guesthouse.ru",
+            location: data.find(contact => contact.key === 'Город')?.value ?? "Астрахань",
         }
-    },
-    methods: {
-        subscribe() {
-            // Логика подписки
-            console.log('Subscribed:', this.email)
-            this.email = ''
-        }
+    } catch (error) {
+        console.error('Ошибка загрузки номеров:', error)
+    } finally {
+        loading.value = false
     }
 }
+
+onMounted(async () => {
+    await loadContacts()
+})
+
 </script>
 
 <style scoped>

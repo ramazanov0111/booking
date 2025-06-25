@@ -94,7 +94,7 @@
                         <div class="flex justify-between items-center">
                             <div class="flex items-center space-x-3">
                                 <label
-                                    v-for="amenity in amenitiesList"
+                                    v-for="amenity in (amenities ?? amenitiesList)"
                                     :key="amenity"
                                     class="flex items-center space-x-2 rounded-lg hover:bg-gray-50 amenities-filter-item"
                                 >
@@ -130,8 +130,14 @@
                         <Link :href="route('room.show', room.id)" class="grid">
                             <div class="room-image">
                                 <img v-if="room.imageUrl" :src="room.imageUrl" :alt="room.name">
-                                <div class="price-badge" v-if="room.price < room.base_price || room.price.price < room.base_price" :class="{ 'strikethrough': room.price.price > 0 && room.price.price < room.base_price }">{{ formatPrice(room.base_price) }} / ночь</div>
-                                <div class="new-price" v-if="room.price.price > 0">{{ formatPrice(room.price.price) }} / ночь</div>
+                                <div class="price-badge"
+                                     v-if="room.price < room.base_price || room.price.price < room.base_price"
+                                     :class="{ 'strikethrough': room.price.price > 0 && room.price.price < room.base_price }">
+                                    {{ formatPrice(room.base_price) }} / ночь
+                                </div>
+                                <div class="new-price" v-if="room.price.price > 0">{{ formatPrice(room.price.price) }} /
+                                    ночь
+                                </div>
                             </div>
 
                             <div class="room-content">
@@ -207,6 +213,7 @@ const amenitiesList = ref([
     'Фен',
     'Тапочки'
 ])
+const amenities = ref([])
 const loading = ref(false)
 const error = ref(null)
 const errors = ref({})
@@ -267,10 +274,21 @@ const loadRooms = async () => {
         }
 
         const response = await axios.get(route('api.rooms.list'), {params})
-
         filteredRooms.value = response.data.data
     } catch (e) {
         error.value = 'Не удалось загрузить номера. Попробуйте позже.'
+    } finally {
+        loading.value = false
+    }
+}
+
+const loadAmenities = async () => {
+    try {
+        const response = await axios.get(route('amenities'))
+
+        amenities.value = response.data.value
+    } catch (e) {
+        error.value = 'Не удалось загрузить. Попробуйте позже.'
     } finally {
         loading.value = false
     }
@@ -305,17 +323,6 @@ const openModal = (room, user) => {
     }
 }
 
-const handleInput = (nextField) => {
-    console.log(nextField)
-    // Автоматический переход к следующему полю
-    nextTick(() => {
-        this.$refs.checkOutInput.focus();
-    });
-    nextTick(() => {
-        this.$refs[nextField].focus();
-    });
-}
-
 const handleCheckInSelected = () => {
     if (filters.value.checkIn) {
         nextTick(() => {
@@ -325,7 +332,7 @@ const handleCheckInSelected = () => {
     }
 }
 
-const handleCheckOutSelected = () =>  {
+const handleCheckOutSelected = () => {
     if (filters.value.checkOut) {
         // После выбора даты выезда можно перейти к следующему блоку
         // Например, к полю "Гости"
@@ -337,8 +344,9 @@ const handleCheckOutSelected = () =>  {
 }
 
 // Инициализация
-onMounted(() => {
-    loadRooms()
+onMounted(async() => {
+    await loadAmenities()
+    await loadRooms()
     const now = new Date();
     const msUntilMidnight = new Date(now).setHours(24, 0, 0, 0) - now;
 
@@ -388,6 +396,7 @@ onMounted(() => {
     flex: 1; /* Занимает все доступное пространство */
     flex-direction: column;
 }
+
 .amenities-filter-item {
     padding: 0.3rem 0.5rem;
     font-size: 1.1em;

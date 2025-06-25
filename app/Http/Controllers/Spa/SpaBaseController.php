@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Spa;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BlockedDateResource;
 use App\Http\Resources\BookingResource;
+use App\Http\Resources\ConfigResource;
 use App\Http\Resources\PriceResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Resources\RoomResource;
 use App\Models\BlockedDate;
 use App\Models\Booking;
+use App\Models\Config;
 use App\Models\Price;
 use App\Models\Review;
 use App\Models\Room;
@@ -180,4 +182,25 @@ class SpaBaseController extends Controller
 
         return response()->json(ReviewResource::collection($reviews));
     }
+
+    public function getAmenities(Request $request): JsonResponse
+    {
+        $amenities = Config::query()
+            ->where('key', 'Удобства')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return response()->json(new ConfigResource($amenities));
+    }
+
+    public function getContacts(Request $request): JsonResponse
+    {
+        $contacts = Config::query()
+            ->whereNot('key', 'Удобства')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return response()->json(ConfigResource::collection($contacts));
+    }
+
 }

@@ -1,5 +1,5 @@
 <template>
-    <SpaLayout title="">
+    <SpaLayout title="Главная">
         <div class="about-page">
             <!-- Секция с основным описанием -->
             <section class="about-section">
@@ -11,7 +11,7 @@
                         class="main-image"
                     >
                     <div class="description">
-                        <p>Мы предлагаем уютные номера в самом сердце {{ location }}.</p>
+                        <p>Мы предлагаем уютные номера в самом сердце города {{ contacts.location }}.</p>
                         <p>Наш гостевой дом работает с 2010 года и за это время мы приняли более 5000 гостей!</p>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                     <!--                        style="color:#eee;font-size:12px;position:absolute;top:0px;">Астраханский государственный технический университет</a>-->
                     <!--                    <a href="https://yandex.ru/maps/37/astrahan/category/university/184106140/?utm_medium=mapframe&utm_source=maps"-->
                     <!--                    style="color:#eee;font-size:12px;position:absolute;top:14px;">ВУЗ в Астрахани</a>-->
-                    <iframe :src="mapUrl" width="100%" height="450" frameborder="1" allowfullscreen="true"
+                    <iframe :src="data.mapUrl" width="100%" height="450" frameborder="1" allowfullscreen="true"
                             loading="lazy"
                             style="position:relative; border:0;" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
@@ -62,59 +62,41 @@
     </SpaLayout>
 </template>
 
-<script>
+<script setup>
+import {inject, onMounted, ref} from "vue";
+import {route} from "ziggy-js";
 import SpaLayout from "@/Layouts/SpaLayout.vue";
 
-export default {
-    components: {SpaLayout},
-    data() {
-        return {
-            location: "Астрахань",
-            contacts: {
-                address: "ул. Примерная, д. 10",
-                phone: "+7 (999) 123-45-67",
-                email: "contact@guesthouse.ru"
-            },
-            mapUrl: "https://yandex.ru/map-widget/v1/?ll=48.057886%2C46.373252&mode=poi&poi%5Bpoint%5D=48.053850%2C46.375430&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D1102893439&z=17.04",
-            reviews: [
-                {
-                    author: "Иван Петров",
-                    rating: 5,
-                    text: "Прекрасное место! Очень уютные номера и дружелюбный персонал.",
-                    date: "2024-03-15"
-                },
-                // ...другие отзывы
-            ],
-            feedbackForm: {
-                name: "",
-                email: "",
-                rating: 0,
-                message: ""
-            },
-            isSubmitting: false
-        };
-    },
-    methods: {
-        formatDate(dateString) {
-            const options = {year: 'numeric', month: 'long', day: 'numeric'};
-            return new Date(dateString).toLocaleDateString('ru-RU', options);
-        },
-        async submitFeedback() {
-            this.isSubmitting = true;
-            try {
-                // Отправка данных на бэкенд
-                await this.$axios.post('/api/feedback', this.feedbackForm);
-                alert('Спасибо за ваш отзыв!');
-                this.feedbackForm = {name: '', email: '', rating: 0, message: ''};
-            } catch (error) {
-                console.error('Ошибка отправки:', error);
-                alert('Произошла ошибка при отправке формы');
-            } finally {
-                this.isSubmitting = false;
-            }
+const data = ref({
+    mapUrl: "https://yandex.ru/map-widget/v1/?ll=48.057886%2C46.373252&mode=poi&poi%5Bpoint%5D=48.053850%2C46.375430&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D1102893439&z=17.04",
+})
+
+const loading = ref(true)
+const contacts = ref([])
+
+const loadContacts = async () => {
+    try {
+        loading.value = true
+
+        const {data} = await axios.get(route('contacts'))
+
+        contacts.value = {
+            address: data.find(contact => contact.key === 'Адрес')?.value ?? "ул. Примерная, д. 11",
+            phone: data.find(contact => contact.key === 'Телефон')?.value ?? "+7 (999) 123-45-67",
+            email: data.find(contact => contact.key === 'Email')?.value ?? "contact@guesthouse.ru",
+            location: data.find(contact => contact.key === 'Город')?.value ?? "Астрахань",
         }
+    } catch (error) {
+        console.error('Ошибка загрузки номеров:', error)
+    } finally {
+        loading.value = false
     }
-};
+}
+
+onMounted(async () => {
+    await loadContacts()
+})
+
 </script>
 
 <style scoped>

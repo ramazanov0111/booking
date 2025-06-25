@@ -25,9 +25,20 @@ Route::middleware([
                 return Inertia::render('Admin/UserForm');
             })->name('users.create');
         });
+        Route::prefix('configs')->group(function (){
+            Route::get('/', function () {
+                return Inertia::render('Admin/ConfigList');
+            })->name('configs.list');
+            Route::get('/edit/{config}', function () {
+                return Inertia::render('Admin/ConfigForm');
+            })->name('configs.edit');
+            Route::get('/create', function () {
+                return Inertia::render('Admin/ConfigForm');
+            })->name('configs.create');
+        });
         Route::prefix('rooms')->group(function (){
             Route::get('/', function () {
-                return Inertia::render('Admin/RoomIndex');
+                return Inertia::render('Admin/RoomList');
             })->name('rooms.list');
             Route::get('/edit/{room}', function () {
                 return Inertia::render('Admin/RoomShow');

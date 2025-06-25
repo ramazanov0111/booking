@@ -58,6 +58,9 @@ const logout = () => {
                                 <NavLink :href="route('users.list')" :active="route().current('users.list')">
                                     Пользователи
                                 </NavLink>
+                                <NavLink :href="route('configs.list')" :active="route().current('configs.list')">
+                                    Конфигурации
+                                </NavLink>
                                 <NavLink :href="route('rooms.list')" :active="route().current('rooms.list')">
                                     Номера
                                 </NavLink>
@@ -177,6 +180,9 @@ const logout = () => {
                             <DropdownLink :href="route('users.list')" :active="route().current('users.list')">
                                 Пользователи
                             </DropdownLink>
+                            <NavLink :href="route('configs.list')" :active="route().current('configs.list')">
+                                Конфигурации
+                            </NavLink>
                             <DropdownLink :href="route('rooms.list')" :active="route().current('rooms.list')">
                                 Номера
                             </DropdownLink>
