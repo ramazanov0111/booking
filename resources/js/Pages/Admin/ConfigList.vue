@@ -46,8 +46,11 @@
                                 <div class="font-medium text-gray-900">{{ config.key }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span v-for="value in config.value">
+                                <span v-if="config.is_array" v-for="value in config.value">
                                    {{ value }}<br />
+                                </span>
+                                <span v-if="!config.is_array">
+                                   {{ config.value }}<br />
                                 </span>
                             </td>
 
