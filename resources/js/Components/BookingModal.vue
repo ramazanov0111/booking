@@ -25,7 +25,7 @@
                         :enable-time-picker="false"
                         format="dd-MM-yyy"
                         auto-apply
-                        @on-change="loadPrice"
+                        @on-change="fetchPricePeriods"
                     />
                 </div>
 
@@ -38,7 +38,7 @@
                         :enable-time-picker="false"
                         format="dd-MM-yyy"
                         auto-apply
-                        @on-change="loadPrice"
+                        @on-change="fetchPricePeriods"
                     />
                 </div>
 
@@ -54,30 +54,46 @@
                         </option>
                     </select>
                 </div>
+
+                <!-- Детализация стоимости -->
+<!--                <div v-if="calculation" class="calculation-result">-->
+<!--                    <h3>Детали расчета:</h3>-->
+<!--                    <div class="price-breakdown">-->
+<!--                        <div v-for="day in calculation.daily_breakdown" class="day-price">-->
+<!--                            {{ day.date }}: {{ formatPrice(day.price) }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="total-price">-->
+<!--                        Итого за {{ calculation.nights }} ночей:-->
+<!--                        <strong>{{ formatPrice(calculation.total) }}</strong>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
             <!-- Детализация стоимости -->
-            <table>
+            <table v-if="calculation">
                 <thead>
                 <tr>
-                    <th>Количество ночей</th>
-                    <th>Цена за ночь в указанный период</th>
-                    <th>Сумма</th>
+                    <th>День</th>
+                    <th>Цена за ночь</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-
-                    <td>{{ totalNights() }}</td>
-
-                    <td>{{ currentPrice }}</td>
-
-                    <td>{{ totalPrice }}</td>
+                <tr v-for="day in calculation.daily_breakdown">
+                    <td class="px-6 py-2 whitespace-nowrap space-x-2">{{ day.date }}</td>
+                    <td class="px-6 py-2 whitespace-nowrap space-x-2">{{ formatPrice(day.price) }}</td>
                 </tr>
                 </tbody>
+                <tfoot>
+                <tr>
+                    <td class="px-6 py-2 whitespace-nowrap space-x-2">Итого за {{ calculation.nights }} {{ pluralizeNights(calculation.nights) }} </td>
+                    <td class="px-6 py-2 whitespace-nowrap space-x-2">{{ formatPrice(calculation.total) }}</td>
+                </tr>
+                </tfoot>
             </table>
+
         </div>
 
-        <div class="flex flex-row justify-end px-6 py-4 bg-gray-100 text-end">
+        <div class="flex flex-row justify-end px-6 py-4 bg-gray-100 text-end rounded-lg">
             <!-- Кнопка бронирования -->
             <button
                 class="book-btn"
@@ -85,14 +101,14 @@
                 :disabled="!isFormValid || isProcessing"
             >
                 <span v-if="isProcessing">Обработка...</span>
-                <span v-else>Забронировать за {{ totalPrice }} ₽</span>
+                <span v-else>Забронировать за {{ calculation?.total }} ₽</span>
             </button>
         </div>
     </Modal>
 </template>
 
 <script setup>
-import {ref, computed, watch, onMounted} from 'vue'
+import {ref, computed, watch, onMounted, watchEffect} from 'vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import Modal from "@/Components/Modal.vue";
@@ -132,6 +148,9 @@ const disabledDates = ref(null)
 const currentPrice = ref(null)
 const errors = ref({})
 
+const pricePeriods = ref(null)
+const calculation = ref(null);
+
 const paymentMethods = [
     {key: 'online', value: 'Онлайн'},
     {key: 'on_site', value: 'На месте'}
@@ -160,7 +179,22 @@ const totalPrice = computed(() =>
     currentPrice.value * totalNights()
 )
 
-const loadPrice = async () => {
+const pluralizeNights = (nights) => {
+    if (nights % 10 === 1 && nights % 100 !== 11) return 'ночь'
+    if (nights % 10 >= 2 && nights % 10 <= 4 && (nights % 100 < 10 || nights % 100 >= 20)) return 'ночи'
+    return 'ночей'
+}
+
+// Форматирование цены
+const formatPrice = (price) => {
+    return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        maximumFractionDigits: 0
+    }).format(price)
+}
+
+const fetchPricePeriods = async () => {
     try {
         const params = {
             roomId: props.room?.id,
@@ -171,8 +205,9 @@ const loadPrice = async () => {
         if (checkInDate.value && checkOutDate.value) {
             const response = await axios.get(route('price.by_dates'), {params})
 
-            if (response.data.price) {
-                currentPrice.value = response.data.price
+            if (response.data.length) {
+                pricePeriods.value = response.data
+                calculateLocally();
             } else {
                 currentPrice.value = props.room.base_price
             }
@@ -184,6 +219,47 @@ const loadPrice = async () => {
         console.error('Ошибка загрузки цены:', error)
     }
 }
+
+// Форматирование данных
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
+}
+
+const calculateLocally = () => {
+    if (!pricePeriods.value.length) return;
+
+    const start = new Date(checkInDate.value);
+    const end = new Date(checkOutDate.value);
+    const dailyBreakdown = [];
+    let total = 0;
+
+    for (let date = new Date(start); date < end; date.setDate(date.getDate() + 1)) {
+        const price = getPriceForDate(date);
+        dailyBreakdown.push({
+            date: formatDate(date),
+            price: price
+        });
+        total += price;
+    }
+
+    calculation.value = {
+        total: total,
+        nights: Math.ceil((end - start) / (1000 * 60 * 60 * 24)),
+        daily_breakdown: dailyBreakdown
+    };
+};
+
+const getPriceForDate = (date) => {
+    const dateStr = date;
+    const period = pricePeriods.value.find(p =>
+        dateStr >= new Date(p.start_date) && dateStr <= new Date(p.end_date)
+    );
+    return period ? period.price : 0;
+};
 
 const getDisabledDatesForRoom = async () => {
     if (props.show) {
@@ -242,7 +318,7 @@ const handleBooking = async () => {
             user_id: props.user.id,
             room_id: props.room.id,
             payment_method: paymentMethod.value,
-            total_price: totalPrice.value,
+            total_price: calculation.value.total ,
             check_in: checkInDate.value,
             check_out: checkOutDate.value,
             status: 'confirmed',
@@ -270,7 +346,7 @@ watch([checkInDate, checkOutDate], () => {
     if (checkOutDate.value && checkInDate.value && checkOutDate.value <= checkInDate.value) {
         checkOutDate.value = null
     }
-    loadPrice()
+    fetchPricePeriods()
 })
 
 // Инициализация
@@ -322,7 +398,7 @@ th {
 }
 
 td {
-    @apply px-6 py-4 whitespace-nowrap;
+    @apply px-6 py-2 whitespace-nowrap;
 }
 
 tr:hover td {

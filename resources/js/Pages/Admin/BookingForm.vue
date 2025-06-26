@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed, watch} from 'vue'
+import {ref, onMounted, computed, watch, watchEffect} from 'vue'
 import {useRouter} from 'vue-router'
 import {Russian} from 'flatpickr/dist/l10n/ru'
 import AppLayout from "../../Layouts/AppLayout.vue";

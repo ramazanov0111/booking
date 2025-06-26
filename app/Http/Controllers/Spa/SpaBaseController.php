@@ -87,14 +87,14 @@ class SpaBaseController extends Controller
         $checkInDate = $request->get('checkInDate');
         $checkOutDate = $request->get('checkOutDate');
 
-        $price = Price::query()
+        $prices = Price::query()
             ->when(!is_null($roomId), fn($q) => $q->where('room_id', $roomId))
-            ->where('start_date', '<=', $checkInDate)
-            ->where('end_date', '>=', $checkOutDate)
-            ->orderBy('start_date', 'desc')
-            ->first();
+            ->where('start_date', '<=', $checkOutDate)
+            ->where('end_date', '>=', $checkInDate)
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-        $priceData = $price ? new PriceResource($price) : [];
+        $priceData = $prices ? PriceResource::collection($prices) : [];
 
         return response()->json($priceData);
     }

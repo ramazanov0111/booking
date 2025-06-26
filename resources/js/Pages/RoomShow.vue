@@ -135,14 +135,16 @@
                                         />
                                     </div>
                                 </div>
-                                <p class="text-gray-600 mb-2">Автор: {{ review.user.name }} • {{
-                                        formatDate(review.created_at)
-                                    }}</p>
+                                <p class="text-gray-600 mb-2">
+                                    Автор: {{ review.user.name }} • {{ formatDate(review.created_at) }}
+                                </p>
                                 <p class="text-gray-700">{{ review.comment }}</p>
-                                <p v-if="review.answer" style="text-align: right;" class="text-gray-600 mt-3 mb-2">Администратор • {{
-                                        formatDate(review.updated_at)
-                                    }}</p>
-                                <p v-if="review.answer" style="text-align: right;" class="text-gray-700">{{ review.answer }}</p>
+                                <p v-if="review.answer" style="text-align: right;" class="text-gray-600 mt-3 mb-2">
+                                    Администратор • {{ formatDate(review.updated_at) }}
+                                </p>
+                                <p v-if="review.answer" style="text-align: right;" class="text-gray-700">
+                                    {{ review.answer }}
+                                </p>
                             </div>
                         </div>
                         <div v-else class="text-center py-8 text-gray-500">
@@ -171,10 +173,11 @@
                                     <VueDatePicker
                                         v-model="checkIn"
                                         :disabled-dates="disabledDates"
+                                        :min-date="minDate"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
-                                        @on-change="loadPrice"
+                                        @on-change="fetchPricePeriods"
                                     />
                                 </div>
 
@@ -182,10 +185,11 @@
                                     <VueDatePicker
                                         v-model="checkOut"
                                         :disabled-dates="disabledDates"
+                                        :min-date="minDateForCheckOut"
                                         :enable-time-picker="false"
                                         format="dd-MM-yyy"
                                         auto-apply
-                                        @on-change="loadPrice"
+                                        @on-change="fetchPricePeriods"
                                     />
                                 </div>
 
@@ -210,20 +214,26 @@
                                 :disabled="isProcessing"
                             >
                                 <span v-if="isProcessing">Обработка...</span>
-                                <span v-else>Забронировать за {{ totalPrice }} ₽</span>
+                                <span v-else>Забронировать за {{ formatPrice(calculation?.total ?? 0) }}</span>
                             </button>
                         </div>
 
-                        <div class="mt-6 pt-6 border-t">
+                        <!-- Детализация стоимости -->
+                        <div  v-for="day in calculation?.daily_breakdown" class="mt-2 pt-2 border-b">
                             <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">{{ currentPrice }} ₽ × {{ nightsCount }} ночей</span>
-                                <span>{{ totalPrice }} ₽</span>
-                            </div>
-                            <div class="flex justify-between font-bold text-lg mt-4 pt-4 border-t">
-                                <span>Итого</span>
-                                <span>{{ totalPrice }} ₽</span>
+                                <span class="text-gray-600">{{ day.date }}:</span>
+                                <span class="text-gray-600">{{ formatPrice(day.price) }}</span>
                             </div>
                         </div>
+
+                        <div  class="pt-2">
+                            <div class="flex justify-between font-bold text-lg mt-2 pt-2">
+                                <span>Итого</span>
+                                <span class="text-gray-600 font-normal">{{ calculation?.nights  ?? 0 }} {{ pluralizeNights(calculation?.nights) }}</span>
+                                <span>{{ formatPrice(calculation?.total ?? 0) }}</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -243,11 +253,11 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, watch} from 'vue'
-import SpaLayout from "@/Layouts/SpaLayout.vue";
-import {route} from "ziggy-js";
+import {ref, computed, watch, onMounted, watchEffect} from 'vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
+import SpaLayout from "@/Layouts/SpaLayout.vue";
+import {route} from "ziggy-js";
 import Lightbox from '@/Components/Lightbox.vue';
 
 const disabledDates = ref(null)
@@ -257,12 +267,24 @@ const roomCur = ref({})
 const isProcessing = ref(false)
 const errors = ref({})
 
+// Минимальная дата для заезда - текущий день
+const minDate = ref(new Date());
+minDate.value.setHours(0, 0, 0, 0); // Обнуляем время
+
+// Минимальная дата для выезда:
+// - Если выбрана дата заезда, то дата заезда
+// - Иначе текущий день
+const minDateForCheckOut = computed(() => {
+    return checkIn.value || minDate.value;
+});
+
 // Загрузка данных номера
 const loadRoomData = async () => {
     try {
         const {data} = await axios.get(route('rooms.show', roomId))
 
         roomCur.value = data.data
+        currentPrice.value = roomCur.value.base_price
     } catch (error) {
         console.error('Ошибка загрузки данных:', error)
     }
@@ -276,6 +298,8 @@ const paymentMethods = [
     {key: 'online', value: 'Онлайн'},
     {key: 'on_site', value: 'На месте'}
 ];
+const pricePeriods = ref(null)
+const calculation = ref(null);
 
 // Отзывы
 const reviews = ref([])
@@ -301,15 +325,7 @@ const newReview = ref({
     text: ''
 })
 
-// Вычисляемые свойства
-const nightsCount = computed(() => {
-    loadPrice()
-    if (!checkIn.value || !checkOut.value) return 0
-    const diff = checkOut.value - checkIn.value
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
-})
-
-const loadPrice = async () => {
+const fetchPricePeriods = async () => {
     try {
         const params = {
             roomId: roomId,
@@ -320,18 +336,47 @@ const loadPrice = async () => {
         if (checkIn.value && checkOut.value) {
             const response = await axios.get(route('price.by_dates'), {params})
 
-            if (response.data.price) {
-                currentPrice.value = response.data.price
-            } else {
-                currentPrice.value = roomCur.value.base_price
+            if (response.data.length) {
+                pricePeriods.value = response.data
+                calculateLocally();
             }
-        } else {
-            currentPrice.value = roomCur.value.base_price
         }
     } catch (error) {
         console.error('Ошибка загрузки цены:', error)
     }
 }
+
+const calculateLocally = () => {
+    if (!pricePeriods.value.length) return;
+
+    const start = new Date(checkIn.value);
+    const end = new Date(checkOut.value);
+    const dailyBreakdown = [];
+    let total = 0;
+
+    for (let date = new Date(start); date < end; date.setDate(date.getDate() + 1)) {
+        const price = getPriceForDate(date);
+        dailyBreakdown.push({
+            date: formatDate(date),
+            price: price
+        });
+        total += price;
+    }
+
+    calculation.value = {
+        total: total,
+        nights: Math.ceil((end - start) / (1000 * 60 * 60 * 24)),
+        daily_breakdown: dailyBreakdown
+    };
+};
+
+const getPriceForDate = (date) => {
+    const dateStr = date;
+    const period = pricePeriods.value.find(p =>
+        dateStr >= new Date(p.start_date) && dateStr <= new Date(p.end_date)
+    );
+    return period ? period.price : 0;
+};
 
 const getDisabledDatesForRoom = async () => {
     try {
@@ -344,12 +389,10 @@ const getDisabledDatesForRoom = async () => {
     }
 }
 
-const totalPrice = computed(() =>
-    currentPrice.value * nightsCount.value
-)
-
 // Методы
 const handleBooking = async (user) => {
+    if (!calculation.value) return alert('Заполните все поля!')
+
     try {
         isProcessing.value = true
         errors.value = {}
@@ -358,7 +401,7 @@ const handleBooking = async (user) => {
             user_id: user.id,
             room_id: roomId,
             payment_method: paymentMethod.value,
-            total_price: totalPrice.value,
+            total_price: calculation.value.total,
             check_in: checkIn.value,
             check_out: checkOut.value,
             status: 'confirmed',
@@ -406,6 +449,12 @@ const submitReview = async (user) => {
     }
 }
 
+const pluralizeNights = (nights) => {
+    if (nights % 10 === 1 && nights % 100 !== 11) return 'ночь'
+    if (nights % 10 >= 2 && nights % 10 <= 4 && (nights % 100 < 10 || nights % 100 >= 20)) return 'ночи'
+    return 'ночей'
+}
+
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('ru-RU', {
         day: 'numeric',
@@ -439,19 +488,27 @@ function closeLightbox() {
 }
 
 // Валидация при изменении дат
-watch([checkIn.value, checkOut.value], () => {
+watch([checkIn, checkOut], () => {
     if (checkOut.value && checkIn.value && checkOut.value <= checkIn.value) {
         checkOut.value = null
     }
-    loadPrice()
+    fetchPricePeriods()
 })
 
 // Инициализация
 onMounted(async () => {
     await loadRoomData()
-    await loadPrice()
-    await getDisabledDatesForRoom()
     await loadReviews()
+    // await fetchPricePeriods()
+    await getDisabledDatesForRoom()
+
+    const now = new Date();
+    const msUntilMidnight = new Date(now).setHours(24, 0, 0, 0) - now;
+
+    setTimeout(() => {
+        minDate.value = new Date();
+        minDate.value.setHours(0, 0, 0, 0);
+    }, msUntilMidnight);
 })
 
 </script>
