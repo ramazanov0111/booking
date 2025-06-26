@@ -26,7 +26,7 @@ class StoreConfigRequest extends FormRequest
             'key' => 'required|string|max:50',
             'is_array' => 'required|boolean',
             'value' => 'array',
-            'value.*' => 'string|max:100'
+            'value.*' => 'string|max:1000'
         ];
     }
 }

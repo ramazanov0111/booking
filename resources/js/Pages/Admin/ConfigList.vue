@@ -20,7 +20,7 @@
 
                 <!-- Таблица номеров -->
                 <div class="bg-white rounded-lg shadow overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 auto-height-table">
                         <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Название</th>
@@ -40,7 +40,7 @@
                             </td>
                         </tr>
 
-                        <!-- Список номеров -->
+                        <!-- Список -->
                         <tr v-for="config in configs" :key="config.id" @click="handleRowClick(config)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ config.key }}</div>
@@ -160,6 +160,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.auto-height-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.auto-height-table td {
+    //border: 1px solid #ddd;
+    padding: 8px;
+    word-wrap: break-word; /* Перенос длинных слов */
+    white-space: normal; /* Разрешить перенос строк */
+    overflow-wrap: break-word; /* Современный аналог word-wrap */
+}
 
 .filters {
     display: flex;

@@ -48,7 +48,16 @@
                             </label>
                         </div>
                         <!-- Значение -->
-                        <div>
+                        <div v-if="!form.is_array">
+                            <label class="block text-gray-700 mb-2">Значение <span class="required">*</span></label>
+                            <textarea v-model="form.value"
+                                      rows="4"
+                                      class="w-full p-2 border rounded-lg"
+                                      :class="{ 'border-red-500': errors.value }"
+                            >
+                            </textarea>
+                        </div>
+                        <div v-if="form.is_array">
                             <label class="block text-gray-700 mb-2">Значение <span class="required">*</span></label>
                             <div v-for="(item, index) in form.value"
                                  :key="index"
@@ -60,7 +69,7 @@
                                     :class="{ 'border-red-500': errors.value }"
                                 >
                                 <button
-                                    v-if="form.is_array && index !== 0"
+                                    v-if="index !== 0"
                                     @click.prevent="removeDetail(index)"
                                     class="text-red-600 hover:text-red-900">
                                     <i class="fas fa-xmark-circle"></i>
@@ -158,12 +167,6 @@ const validateForm = () => {
     return isValid
 }
 
-const statuses = ref({
-    'confirmed': 'Подтверждено',
-    'paid': 'Оплачено',
-    'canceled': 'Отменено',
-})
-
 const addDetail = () => {
     form.value.value.push('');
 }
@@ -182,12 +185,11 @@ const removeDetails = () => {
 const handleSubmit = async () => {
     if (!validateForm()) return
 
+    form.value.value = !form.value.is_array ? [form.value.value] : form.value.value
     loading.value = true
     const payload = {
-        ...form.value
+        ...form.value,
     }
-
-    console.log(payload)
 
     try {
         if (isEditMode.value) {
