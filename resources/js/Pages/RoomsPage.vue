@@ -1,5 +1,5 @@
 <template>
-    <SpaLayout title="Номер">
+    <SpaLayout title="Номера">
         <div class="catalog-page">
             <div class="max-w-7xl mx-auto p-6 mb-6 bg-white sm:px-6 lg:px-8 rounded-xl shadow-lg">
                 <div class="mb-8">

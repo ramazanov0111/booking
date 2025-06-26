@@ -1,4 +1,5 @@
 <template>
+    <Head :title="title" />
     <div>
         <div class="min-h-screen bg-gray-100">
             <!-- Шапка -->
@@ -19,6 +20,11 @@
 import SpaHeader from '@/Components/SpaHeader.vue'
 import SpaFooter from '@/Components/SpaFooter.vue'
 import 'flatpickr/dist/flatpickr.min.css';
+import {Head} from "@inertiajs/vue3";
+
+defineProps({
+    title: String,
+});
 
 </script>
 

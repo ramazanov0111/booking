@@ -1,5 +1,5 @@
 <template>
-    <SpaLayout title="About">
+    <SpaLayout title="Мои бронирования">
         <div class="container mx-auto px-4 py-8 max-w-6xl">
             <!-- Заголовок страницы -->
             <div class="mb-8">
