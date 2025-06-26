@@ -11,8 +11,9 @@
                         class="main-image"
                     >
                     <div class="description">
-                        <p>Мы предлагаем уютные номера в самом сердце города {{ contacts.location }}.</p>
-                        <p>Наш гостевой дом работает с 2010 года и за это время мы приняли более 5000 гостей!</p>
+                        <p>
+                            {{ contacts.description}}
+                        </p>
                     </div>
                 </div>
             </section>
@@ -85,6 +86,8 @@ const loadContacts = async () => {
             phone: data.find(contact => contact.key === 'Телефон')?.value ?? "+7 (999) 123-45-67",
             email: data.find(contact => contact.key === 'Email')?.value ?? "contact@guesthouse.ru",
             location: data.find(contact => contact.key === 'Город')?.value ?? "Астрахань",
+            description: data.find(contact => contact.key === 'Описание')?.value ?? "Мы предлагаем уютные номера в самом сердце города Астрахань.\n" +
+                "                        Наш гостевой дом работает с 2010 года и за это время мы приняли более 5000 гостей!",
         }
     } catch (error) {
         console.error('Ошибка загрузки номеров:', error)
