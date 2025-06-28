@@ -338,17 +338,16 @@ const fetchPricePeriods = async () => {
 
             if (response.data.length) {
                 pricePeriods.value = response.data
-                calculateLocally();
             }
+            calculateLocally()
         }
+        currentPrice.value = props.room.base_price
     } catch (error) {
         console.error('Ошибка загрузки цены:', error)
     }
 }
 
 const calculateLocally = () => {
-    if (!pricePeriods.value.length) return;
-
     const start = new Date(checkIn.value);
     const end = new Date(checkOut.value);
     const dailyBreakdown = [];
@@ -372,10 +371,14 @@ const calculateLocally = () => {
 
 const getPriceForDate = (date) => {
     const dateStr = date;
-    const period = pricePeriods.value.find(p =>
-        dateStr >= new Date(p.start_date) && dateStr <= new Date(p.end_date)
-    );
-    return period ? period.price : 0;
+    if (pricePeriods.value) {
+        const period = pricePeriods.value.find(p =>
+            dateStr >= new Date(p.start_date) && dateStr <= new Date(p.end_date)
+        );
+        return period ? period.price : currentPrice.value;
+    } else {
+        return currentPrice.value;
+    }
 };
 
 const getDisabledDatesForRoom = async () => {
