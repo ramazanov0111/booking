@@ -156,4 +156,8 @@ return [
         ]),
     ],
 
+    'resetPassword' => [
+        'reset' => '/reset-password?token={token}&email={email}',
+    ],
+
 ];
