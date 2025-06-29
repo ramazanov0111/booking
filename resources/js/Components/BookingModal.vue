@@ -299,8 +299,14 @@ const getDisabledDatesForRoom = async () => {
 
 const loadDates = async () => {
     if (props.checkIn && props.checkOut) {
-        checkInDate.value = props.checkIn
-        checkOutDate.value = props.checkOut
+        let isDisabled = disabledDates.value.find(disabledDate => new Date(props.checkIn) >= new Date(disabledDate.value)
+            && new Date(disabledDate.value) <= new Date(props.checkOut))
+
+        if (!isDisabled) {
+            checkInDate.value = props.checkIn
+            checkOutDate.value = props.checkOut
+        }
+        await fetchPricePeriods()
     }
 }
 
