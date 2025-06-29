@@ -81,10 +81,9 @@
                             </div>
                         </div>
 
-                        <!-- Статус -->
                         <div>
-                            <label class="block text-gray-700 mb-2">Статус</label>
-                            <label class="flex items-center space-x-2">
+                            <!-- Статус -->
+                            <label class="flex items-center space-x-2 mb-3">
                                 <input
                                     v-model="form.is_available"
                                     type="checkbox"
@@ -92,7 +91,17 @@
                                 >
                                 <span class="text-gray-700">Доступен для бронирования</span>
                             </label>
+                            <!-- Дополнительное место -->
+                            <label class="flex items-center space-x-2">
+                                <input
+                                    v-model="form.is_available_extra_bed"
+                                    type="checkbox"
+                                    class="form-checkbox h-5 w-5 text-blue-600"
+                                >
+                                <span class="text-gray-700">Дополнительное место</span>
+                            </label>
                         </div>
+
                         <!-- Изображение -->
                         <div v-if="form.imageUrl">
                             <label class="block text-gray-700 mb-2">Текущее изображение</label>
@@ -329,6 +338,7 @@ const form = ref({
     base_price: 0,
     is_available: true,
     amenities: [],
+    is_available_extra_bed: false,
     imageUrl: null,
     gallery: [],
 })

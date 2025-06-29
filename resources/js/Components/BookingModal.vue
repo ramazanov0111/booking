@@ -55,6 +55,18 @@
                     </select>
                 </div>
 
+                <div v-if="room?.is_available_extra_bed" class="flex py-2">
+                    <label class="flex items-center space-x-2">
+                        <input
+                            v-model="extraBed"
+                            type="checkbox"
+                            class="form-checkbox h-5 w-5 text-blue-600"
+                            @change.prevent="calculateLocally"
+                        >
+                        <span class="text-gray-700">Дополнительное место</span>
+                    </label>
+                </div>
+
                 <!-- Детализация стоимости -->
 <!--                <div v-if="calculation" class="calculation-result">-->
 <!--                    <h3>Детали расчета:</h3>-->
@@ -84,6 +96,10 @@
                 </tr>
                 </tbody>
                 <tfoot>
+                <tr v-if="extraBed">
+                    <td>Дополнительное место:</td>
+                    <td>{{ formatPrice(500) }}/ночь</td>
+                </tr>
                 <tr>
                     <td class="px-6 py-2 whitespace-nowrap space-x-2">Итого за {{ calculation.nights }} {{ pluralizeNights(calculation.nights) }} </td>
                     <td class="px-6 py-2 whitespace-nowrap space-x-2">{{ formatPrice(calculation.total) }}</td>
@@ -144,6 +160,7 @@ const isProcessing = ref(false)
 const checkInDate = ref(null)
 const checkOutDate = ref(null)
 const paymentMethod = ref(null)
+const extraBed = ref(false)
 const disabledDates = ref(null)
 const currentPrice = ref(null)
 const errors = ref({})
@@ -241,9 +258,14 @@ const calculateLocally = () => {
         total += price;
     }
 
+    const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24))
+    if (extraBed.value) {
+        total += 500 * nights;
+    }
+
     calculation.value = {
         total: total,
-        nights: Math.ceil((end - start) / (1000 * 60 * 60 * 24)),
+        nights: nights,
         daily_breakdown: dailyBreakdown
     };
 };
@@ -323,6 +345,7 @@ const handleBooking = async () => {
             check_in: checkInDate.value,
             check_out: checkOutDate.value,
             status: 'confirmed',
+            extra_bed: extraBed.value,
             stripe_payment_id: 'qwerty'
         }
 
@@ -367,6 +390,16 @@ onMounted(async () => {
 
 <style scoped>
 
+.form-checkbox {
+    width: 10%;
+    border-radius: 0.25rem;
+    border: 1px solid #d1d5db;
+}
+
+.form-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -407,7 +440,7 @@ tr:hover td {
 }
 
 label {
-    display: block;
+    //display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
 }

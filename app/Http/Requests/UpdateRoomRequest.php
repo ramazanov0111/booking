@@ -28,6 +28,7 @@ class UpdateRoomRequest extends FormRequest
             'capacity' => 'required|integer|min:1',
             'base_price' => 'required|numeric|min:0',
             'is_available' => 'boolean',
+            'is_available_extra_bed' => 'boolean',
             'amenities' => 'array',
             'amenities.*' => 'string|max:50'
         ];

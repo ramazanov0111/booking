@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
-    protected $fillable = ['user_id', 'room_id', 'check_in', 'check_out', 'total_price', 'status', 'payment_method', 'stripe_payment_id'];
+    protected $fillable = ['user_id', 'room_id', 'check_in', 'check_out', 'total_price', 'status', 'extra_bed', 'payment_method', 'stripe_payment_id'];
 
     protected $casts = [
         'check_in' => 'date',
         'check_out' => 'date',
-        'total_price' => 'float'
+        'total_price' => 'float',
+        'extra_bed' => 'boolean',
     ];
 
     public function user(): HasOne

@@ -29,6 +29,7 @@ class UpdateBookingRequest extends FormRequest
             'check_out' => 'required|date|after:check_in',
             'total_price' => 'required|numeric|min:0',
             'status' => 'required|string',
+            'extra_bed' => 'boolean',
             'payment_method' => 'required|string',
             'stripe_payment_id' => 'string'
         ];

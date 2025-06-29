@@ -34,6 +34,7 @@ class RoomResource extends JsonResource
             'room_image' => $room->room_image,
             'imageUrl' => $room->imageUrl,
             'amenities' => json_decode($room->amenities),
+            'is_available_extra_bed' => $room->is_available_extra_bed,
             'created_at' => $room->created_at->format('d-m-Y H:i'),
             'updated_at' => $room->updated_at->format('d-m-Y H:i'),
             'prices' => $room->prices,

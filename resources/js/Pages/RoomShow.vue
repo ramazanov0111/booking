@@ -168,7 +168,9 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-gray-700 mb-2">Даты проживания</label>
+                                <label class="block text-gray-700 mb-2">
+                                    Даты проживания <span class="required">*</span>
+                                </label>
                                 <div class="flex py-2">
                                     <VueDatePicker
                                         v-model="checkIn"
@@ -194,8 +196,9 @@
                                 </div>
 
                                 <div class="input-group">
-                                    <label class="block text-gray-700 mb-2">Способ оплаты <span
-                                        class="required">*</span></label>
+                                    <label class="block text-gray-700 mb-2">
+                                        Способ оплаты <span class="required">*</span>
+                                    </label>
                                     <select v-model="paymentMethod" required>
                                         <option
                                             v-for="item in paymentMethods"
@@ -205,6 +208,17 @@
                                             {{ item.value }}
                                         </option>
                                     </select>
+                                </div>
+                                <div v-if="roomCur.is_available_extra_bed" class="flex py-2">
+                                    <label class="flex items-center space-x-2">
+                                        <input
+                                            v-model="extraBed"
+                                            type="checkbox"
+                                            class="form-checkbox h-5 w-5 text-blue-600"
+                                            @change.prevent="calculateLocally"
+                                        >
+                                        <span class="text-gray-700">Дополнительное место</span>
+                                    </label>
                                 </div>
                             </div>
 
@@ -219,18 +233,29 @@
                         </div>
 
                         <!-- Детализация стоимости -->
-                        <div  v-for="day in calculation?.daily_breakdown" class="mt-2 pt-2 border-b">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">{{ day.date }}:</span>
-                                <span class="text-gray-600">{{ formatPrice(day.price) }}</span>
+                        <div v-if="calculation">
+                            <div v-for="day in calculation.daily_breakdown" class="mt-2 pt-2 border-b">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">{{ day.date }}:</span>
+                                    <span class="text-gray-600">{{ formatPrice(day.price) }}</span>
+                                </div>
                             </div>
-                        </div>
-
-                        <div  class="pt-2">
-                            <div class="flex justify-between font-bold text-lg mt-2 pt-2">
-                                <span>Итого</span>
-                                <span class="text-gray-600 font-normal">{{ calculation?.nights  ?? 0 }} {{ pluralizeNights(calculation?.nights) }}</span>
-                                <span>{{ formatPrice(calculation?.total ?? 0) }}</span>
+                            <div class="mt-2 pt-2 border-b">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">Дополнительное место:</span>
+                                    <span class="text-gray-600">
+                                    {{ formatPrice(500) }}/ночь
+                                </span>
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <div class="flex justify-between font-bold text-lg mt-2 pt-2">
+                                    <span>Итого</span>
+                                    <span class="text-gray-600 font-normal">
+                                    {{ calculation.nights }} {{ pluralizeNights(calculation.nights) }}
+                                </span>
+                                    <span>{{ formatPrice(calculation.total) }}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -292,6 +317,7 @@ const loadRoomData = async () => {
 
 // Состояния бронирования
 const paymentMethod = ref([])
+const extraBed = ref(false)
 const checkIn = ref(null)
 const checkOut = ref(null)
 const paymentMethods = [
@@ -341,7 +367,6 @@ const fetchPricePeriods = async () => {
             }
             calculateLocally()
         }
-        currentPrice.value = props.room.base_price
     } catch (error) {
         console.error('Ошибка загрузки цены:', error)
     }
@@ -362,9 +387,15 @@ const calculateLocally = () => {
         total += price;
     }
 
+    const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24))
+
+    if (extraBed.value) {
+        total += 500 * nights;
+    }
+
     calculation.value = {
         total: total,
-        nights: Math.ceil((end - start) / (1000 * 60 * 60 * 24)),
+        nights: nights,
         daily_breakdown: dailyBreakdown
     };
 };
@@ -408,6 +439,7 @@ const handleBooking = async (user) => {
             check_in: checkIn.value,
             check_out: checkOut.value,
             status: 'confirmed',
+            extra_bed: extraBed.value,
             stripe_payment_id: 'qwerty'
         }
 
@@ -517,6 +549,16 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+.form-checkbox {
+    width: 10%;
+    border-radius: 0.25rem;
+    border: 1px solid #d1d5db;
+}
+
+.form-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
 
 .previews {
     display: flex;

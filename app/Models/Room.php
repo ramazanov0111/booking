@@ -10,11 +10,12 @@ class Room extends Model
 {
     use HasPhoto;
 
-    protected $fillable = ['name', 'description', 'base_price', 'capacity', 'amenities', 'room_image', 'is_available'];
+    protected $fillable = ['name', 'description', 'base_price', 'capacity', 'amenities', 'is_available_extra_bed', 'room_image', 'is_available'];
 
     protected $casts = [
         'amenities' => 'array',
         'is_available' => 'boolean',
+        'is_available_extra_bed' => 'boolean',
         'base_price' => 'float'
     ];
 
@@ -30,7 +31,7 @@ class Room extends Model
         'Тапочки'
     ];
 
-    public function prices():HasMany
+    public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
     }
