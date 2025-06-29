@@ -88,7 +88,7 @@
 
                                 <button
                                     v-if="isGuest(booking)"
-                                    @click="showReviewForm = true"
+                                    @click="setShowReviewForm(booking.id)"
                                     class="px-4 py-2 border border-blue-700 rounded-lg text-blue-700 hover:bg-blue-50 flex items-center"
                                 >
                                     <i class="fas fa-pencil h-5 w-5 mr-2"></i>
@@ -100,7 +100,7 @@
                     </div>
 
                     <!-- Форма отзыва -->
-                    <div v-if="showReviewForm" class="bg-gray-50 p-6 rounded-lg mb-6">
+                    <div v-if="showReviewForm && bookingForReview === booking.id" class="bg-gray-50 p-6 rounded-lg mb-6">
                         <h3 class="text-lg font-semibold mb-4">Оставьте ваш отзыв</h3>
                         <form @submit.prevent="submitReview($page.props.auth.user, booking.room.id)">
                             <div class="mb-4">
@@ -176,6 +176,7 @@ const paymentMethods = ref({
     'on_site': 'На месте'
 })
 const showReviewForm = ref(false)
+const bookingForReview = ref(null)
 const isSubmittingReview = ref(false)
 const newReview = ref({
     rating: 5,
@@ -196,6 +197,11 @@ const loadData = async () => {
 // Форматирование данных
 const isGuest = (booking) => {
     return booking.status !== 'canceled' && formatDate(booking.check_in) <= formatDate(new Date())
+}
+
+const setShowReviewForm = async (bookingId) => {
+    showReviewForm.value = true
+    bookingForReview.value = bookingId
 }
 
 const submitReview = async (user, roomId) => {
