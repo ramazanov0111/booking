@@ -12,7 +12,7 @@
                     >
                     <div class="description">
                         <p>
-                            {{ contacts.description}}
+                            {{ contacts.description }}
                         </p>
                     </div>
                 </div>
@@ -69,7 +69,7 @@ import {route} from "ziggy-js";
 import SpaLayout from "@/Layouts/SpaLayout.vue";
 
 const data = ref({
-    mapUrl: "https://yandex.ru/map-widget/v1/?ll=48.057886%2C46.373252&mode=poi&poi%5Bpoint%5D=48.053850%2C46.375430&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D1102893439&z=17.04",
+    mapUrl: "https://yandex.ru/map-widget/v1/?ll=39.024380%2C44.138614&mode=search&ol=geo&ouri=ymapsbm1%3A%2F%2Fgeo%3Fdata%3DCgozMTUzNjg2Mjk3ErQB0KDQvtGB0YHQuNGPLCDQmtGA0LDRgdC90L7QtNCw0YDRgdC60LjQuSDQutGA0LDQuSwg0KLRg9Cw0L_RgdC40L3RgdC60LjQuSDQvNGD0L3QuNGG0LjQv9Cw0LvRjNC90YvQuSDQvtC60YDRg9CzLCDRgdC10LvQviDQkNCz0L7QuSwg0LrQstCw0YDRgtCw0Lsg0JvQsNCz0YPQvdCwLCAyLCDQv9C-0LTRitC10LfQtCA3IgoNBxkcQhXwjTBCMIqrz5EQ&z=15.51",
 })
 
 const loading = ref(true)
