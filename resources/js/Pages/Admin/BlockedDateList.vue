@@ -64,7 +64,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="blocked_date in blocked_dates" :key="blocked_date.id" @click="handleRowClick(blocked_date)">
+                        <tr v-for="blocked_date in blocked_dates" :key="blocked_date.id" @click="handleRowClick($event, blocked_date)">
                             <td>{{ blocked_date.room.name }}</td>
 
                             <td>{{ formatDate(blocked_date.date_start) }} - {{ formatDate(blocked_date.date_end) }}</td>
@@ -186,11 +186,18 @@ const deletePeriod = async (blocked_date) => {
     }
 }
 
-const handleRowClick = async (blocked_date) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, blocked_date) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
-    // Или обычная переадресация
     window.location.href = route('blocked_dates.edit', blocked_date.id);
 }
 

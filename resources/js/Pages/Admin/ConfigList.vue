@@ -41,7 +41,7 @@
                         </tr>
 
                         <!-- Список -->
-                        <tr v-for="config in configs" :key="config.id" @click="handleRowClick(config)">
+                        <tr v-for="config in configs" :key="config.id" @click="handleRowClick($event, config)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ config.key }}</div>
                             </td>
@@ -135,11 +135,18 @@ const deleteConfig = async (id) => {
     }
 }
 
-const handleRowClick = async (config) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, config) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
-    // Или обычная переадресация
     window.location.href = route('configs.edit', config.id);
 }
 

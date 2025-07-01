@@ -44,7 +44,7 @@
                         </tr>
 
                         <!-- Список номеров -->
-                        <tr v-for="user in users" :key="user.id" @click="handleRowClick(user)">
+                        <tr v-for="user in users" :key="user.id" @click="handleRowClick($event, user)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ user.name }}</div>
                             </td>
@@ -102,8 +102,8 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
-import {Link, router, useForm} from '@inertiajs/vue3';
+import {onMounted, ref} from 'vue';
+import {Link} from '@inertiajs/vue3';
 import AppLayout from "@/Layouts/AppLayout.vue";
 
 const users = ref([])
@@ -140,9 +140,17 @@ const deleteUser = async (id) => {
     }
 }
 
-const handleRowClick = async (user) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, user) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
     // Или обычная переадресация
     window.location.href = route('users.edit', user.id);

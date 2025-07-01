@@ -65,7 +65,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="price in prices" :key="price.id" @click="handleRowClick(price)">
+                        <tr v-for="price in prices" :key="price.id" @click="handleRowClick($event, price)">
                             <td>{{ price.room.name }}</td>
 
                             <td>{{ price.room.base_price }}</td>
@@ -189,9 +189,17 @@ const deletePrice = async (price) => {
     }
 }
 
-const handleRowClick = async (price) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, price) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
     // Или обычная переадресация
     window.location.href = route('prices.edit', price.id);

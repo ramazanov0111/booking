@@ -85,7 +85,7 @@
                         </tbody>
 
                         <tbody v-else>
-                        <tr v-for="booking in bookings" :key="booking.id" @click="handleRowClick(booking)">
+                        <tr v-for="booking in bookings" :key="booking.id" @click="handleRowClick($event, booking)">
 
                             <td>{{ booking.user.name }} {{ booking.user.lastname }}</td>
 
@@ -231,17 +231,6 @@ const loadData = async () => {
     }
 }
 
-const getDisabledDatesForRoom = async () =>  {
-    try {
-        const response1 = await axios.get(route('blocked_dates.by_room', roomId))
-        const response2 = await axios.get(route('booking_dates.by_room', roomId))
-
-        disabledDates.value = [...response1.data, ...response2.data]
-    } catch (error) {
-        console.error('Ошибка загрузки дат:', error)
-    }
-}
-
 // Загрузка номеров
 const loadRooms = async () => {
     try {
@@ -262,27 +251,7 @@ const loadUsers = async () => {
     }
 }
 
-// Загрузка актуальной цены
-const getPrice = async (start, end, roomId) => {
-    try {
-        const params = {
-            page: meta.value.current_page,
-            room_id: filters.value.room_id,
-            // Разбиваем диапазон дат на start_date и end_date
-            ...(filters.value.date_range && {
-                start_date: filters.value.date_range.split(" — ")[0],
-                end_date: filters.value.date_range.split(" — ")[1]
-            })
-        }
-
-        const response = await axios.get(route('prices.index'), {params})
-        price.value = response.data.data
-    } catch (error) {
-        console.error('Ошибка загрузки пользователей:', error)
-    }
-}
-
-// Удаление цены
+// Удаление бронирования
 const deleteBooking = async (booking) => {
     if (!confirm('Удалить это бронирование?')) return
     try {
@@ -293,11 +262,18 @@ const deleteBooking = async (booking) => {
     }
 }
 
-const handleRowClick = async (booking) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, booking) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
-    // Или обычная переадресация
     window.location.href = route('booking.edit', booking.id);
 }
 

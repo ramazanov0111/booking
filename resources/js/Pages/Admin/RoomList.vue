@@ -86,7 +86,7 @@
                         </tr>
 
                         <!-- Список номеров -->
-                        <tr v-for="room in rooms" :key="room.id" @click="handleRowClick(room)">
+                        <tr v-for="room in rooms" :key="room.id" @click="handleRowClick($event, room)">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">{{ room.name }}</div>
                                 <div class="text-gray-500 text-sm mt-1">{{ room.description }}</div>
@@ -208,11 +208,18 @@ const deleteRoom = async (id) => {
     }
 }
 
-const handleRowClick = async (room) => {
-    // Переход с помощью Vue Router
-    // route('users.edit', user);
+const handleRowClick = async (event, room) => {
+    // Проверяем, был ли клик по элементу, который должен игнорироваться
+    const ignoreElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    // Проверяем сам элемент и всех его родителей
+    let currentElement = event.target;
+    while (currentElement !== event.currentTarget) {
+        if (ignoreElements.includes(currentElement.tagName)) {
+            return; // Прерываем выполнение если клик был по исключенному элементу
+        }
+        currentElement = currentElement.parentElement;
+    }
 
-    // Или обычная переадресация
     window.location.href = route('rooms.edit', room.id);
 }
 
