@@ -416,8 +416,8 @@ const handleSubmit = async () => {
         const payload = {
             ...form.value,
             total_price: calculation.value.total,
-            check_in: checkInDate.value,
-            check_out: checkOutDate.value,
+            check_in: checkInDate.value.toISOString().slice(0, 10),
+            check_out: checkOutDate.value.toISOString().slice(0, 10),
             extra_bed: extraBed.value,
             stripe_payment_id: 'qwerty'
         }

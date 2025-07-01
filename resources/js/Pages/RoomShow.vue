@@ -436,8 +436,8 @@ const handleBooking = async (user) => {
             room_id: roomId,
             payment_method: paymentMethod.value,
             total_price: calculation.value.total,
-            check_in: checkIn.value,
-            check_out: checkOut.value,
+            check_in: checkIn.value.toISOString().slice(0, 10),
+            check_out: checkOut.value.toISOString().slice(0, 10),
             status: 'confirmed',
             extra_bed: extraBed.value,
             stripe_payment_id: 'qwerty'

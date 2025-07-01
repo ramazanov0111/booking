@@ -59,7 +59,6 @@ class AdminBookingController extends Controller
     {
         try {
             $validated = $request->validated();
-
             $booking = Booking::create($validated);
 
             return response()->json([
